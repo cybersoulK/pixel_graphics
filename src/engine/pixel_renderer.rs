@@ -24,7 +24,7 @@ pub struct PixelRenderer {
 
 
 impl PixelRenderer {             
-    pub fn new<T>(event_loop: &EventLoop<T>) -> PixelRenderer {
+    pub fn new<T>(event_loop: &EventLoop<T>) -> Self {
 
         let window = WindowBuilder::new().build(event_loop).unwrap();
         
@@ -48,7 +48,7 @@ impl PixelRenderer {
         });
 
         
-        let mut renderer = PixelRenderer {
+        let mut renderer = Self {
             window,
             context,
 

@@ -1,6 +1,3 @@
-use std::default;
-use std::default::Default;
-
 use pixel_graphics::GameLoop;
 use pixel_graphics::Engine;
 
@@ -17,7 +14,7 @@ impl GameLoop for Game {
 
     fn init(&mut self, engine: &mut Engine){
 
-        let camera_transform: Transform = Default::default();
+        let camera_transform = Transform::default();
         
         let main_camera = Camera::new(camera_transform, 1.0, 1000.0, 90.0);
 

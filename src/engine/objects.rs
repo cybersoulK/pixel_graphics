@@ -23,8 +23,8 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new(transform: Transform, near: f32, far: f32, angle: f32) -> Camera {
-        Camera { transform, near, far, angle }
+    pub fn new(transform: Transform, near: f32, far: f32, angle: f32) -> Self {
+        Self { transform, near, far, angle }
     }
     //fn get_projection_matrix...
 }
@@ -36,8 +36,8 @@ pub struct DrawableObject {
 }
 
 impl DrawableObject {
-    pub fn new(transform: Transform, model: Model) -> DrawableObject {
-        DrawableObject { transform, model }
+    pub fn new(transform: Transform, model: Model) -> Self {
+        Self { transform, model }
     }
 }
 
