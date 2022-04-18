@@ -1,5 +1,3 @@
-use pixel_graphics;
-
 use game::Game;
 
 mod game;
@@ -10,5 +8,3 @@ fn main() {
 
     pixel_graphics::init(game);
 }
-
-    

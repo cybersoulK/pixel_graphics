@@ -13,7 +13,7 @@ use quad_rand::RandomRange;
 
 
 
-const MIN_BUFFER_SIDE: u32 = 800;
+const MIN_BUFFER_SIDE: u32 = 500;
 
 pub struct PixelRenderer {
     window: Window,
@@ -23,7 +23,7 @@ pub struct PixelRenderer {
 }
 
 
-impl PixelRenderer {
+impl PixelRenderer {             
     pub fn new<T>(event_loop: &EventLoop<T>) -> PixelRenderer {
 
         let window = WindowBuilder::new().build(event_loop).unwrap();
@@ -99,14 +99,13 @@ impl PixelRenderer {
         let buffer = self.context.get_frame();
                     
         for i in 0..(self.buffer_size.width * self.buffer_size.height) as usize {
-            buffer[i * 4 + 0] = RandomRange::gen_range(0, 50);
-            buffer[i * 4 + 1] = RandomRange::gen_range(50, 130);
-            buffer[i * 4 + 2] = RandomRange::gen_range(130, 255);
+            buffer[i * 4 + 0] = RandomRange::gen_range(0, 255);
+            buffer[i * 4 + 1] = RandomRange::gen_range(0, 255);
+            buffer[i * 4 + 2] = RandomRange::gen_range(0, 255);
             buffer[i * 4 + 3] = 255;
         } 
     
         self.context.render().unwrap();
-
         self.window.request_redraw();
     }
 }
