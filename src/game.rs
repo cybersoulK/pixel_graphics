@@ -1,11 +1,11 @@
 use pixel_graphics::GameLoop;
 use pixel_graphics::Engine;
 
-use pixel_graphics::assets::Model;
+use pixel_graphics::Model;
 
-use pixel_graphics::objects::Camera;
-use pixel_graphics::objects::DrawableObject;
-use pixel_graphics::objects::Transform;
+use pixel_graphics::Camera;
+use pixel_graphics::DrawableObject;
+use pixel_graphics::Transform;
 
 pub struct Game {}
 
@@ -26,8 +26,9 @@ impl GameLoop for Game {
             position: glam::vec3(100.0, 100.0, 100.0), 
             ..Default::default() 
         };
-        let drawable_model = Model {};
-        let drawable_object = DrawableObject::new(drawable_transform, drawable_model);
+      
+        //let drawable_model = engine.assets.load_model("asds/asdasd.tf");
+        //let drawable_object = DrawableObject::new(drawable_transform, drawable_model);
         
         //engine.addObject(drawable_object);
     }

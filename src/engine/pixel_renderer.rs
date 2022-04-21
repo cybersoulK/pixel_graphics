@@ -1,3 +1,6 @@
+use std::f32::consts::PI;
+use std::ops::{Sub, Mul};
+
 use winit::dpi::{LogicalSize, PhysicalSize};
 use winit::window::{WindowBuilder, Window};
 
@@ -9,11 +12,11 @@ use winit::{
 use pixels::{SurfaceTexture, PixelsBuilder};
 use pixels::wgpu::{PowerPreference, RequestAdapterOptions, Color};
 
-use quad_rand::RandomRange;
+use glam::{Vec4, Vec3, Vec2, IVec2, Vec2Swizzles, Vec3Swizzles, Vec4Swizzles};
 
 
 
-const MIN_BUFFER_SIDE: u32 = 500;
+const MIN_BUFFER_SIDE: u32 = 2000;
 
 pub struct PixelRenderer {
     window: Window,
@@ -98,14 +101,189 @@ impl PixelRenderer {
 
         let buffer = self.context.get_frame();
                     
-        for i in 0..(self.buffer_size.width * self.buffer_size.height) as usize {
-            buffer[i * 4 + 0] = RandomRange::gen_range(0, 255);
-            buffer[i * 4 + 1] = RandomRange::gen_range(0, 255);
-            buffer[i * 4 + 2] = RandomRange::gen_range(0, 255);
-            buffer[i * 4 + 3] = 255;
-        } 
+
+        let mut vertices = [
+            Vec3::new(0.9, 0.1, 0.0),
+            Vec3::new(0.3, 0.1, 0.0),
+            Vec3::new(0.8, 0.3, 0.0),
+        ];
+
+        for vec in vertices.iter_mut() {
+            vec.x *= self.buffer_size.width as f32;
+            vec.y *= self.buffer_size.height as f32;
+        }
+
+        let colors = [
+            Vec4::new(0.498, 1.0, 0.83, 1.0),
+            Vec4::new(1.0, 0.71, 0.756, 1.0),
+            Vec4::new(1.0, 1.0, 0.0, 1.0),
+        ];
+
+        
+        let buffer_size = Vec2::new(self.buffer_size.width as f32, self.buffer_size.height as f32);
+        
+        Self::draw_triangle(buffer, &buffer_size, &vertices, &colors);
     
         self.context.render().unwrap();
         self.window.request_redraw();
+    }
+
+
+
+    fn is_inside_triangle(vertices_2d: &[Vec2], point: &Vec2) -> bool {
+        
+        fn create_vector(vertice_1: &Vec2, vertice_2: &Vec2) -> Vec2 {
+            vertice_2.clone().sub(vertice_1.clone())
+        }
+
+        fn get_angle(vec: &Vec2) -> f32 {
+            
+            let radius = (vec.x.powf(2.0) + vec.y.powf(2.0)).sqrt();
+            let mut angle;
+
+            if vec.x > 0.0 && vec.y > 0.0 {
+
+                let sin = vec.y / radius;
+                angle = sin.asin();
+            }
+            else {
+                
+                let cos = vec.x / radius;
+                angle = cos.acos();
+
+                if vec.y < 0.0 { angle = PI * 2.0 - angle}
+            }
+
+            angle
+        }
+
+   
+        for index in 0 .. vertices_2d.len() {
+
+            let vector_side = create_vector(&vertices_2d[index], 
+                if index == 2 { &vertices_2d[0] } else { &vertices_2d[index+1] });
+
+            let vector_point = create_vector(&vertices_2d[index], &point);
+
+
+            let angle_side = get_angle(&vector_side);
+            let angle_point = get_angle(&vector_point);
+   
+            
+            if angle_side - angle_point < 0.0 {
+                return false
+            }
+        }
+        
+        true
+    }
+    
+
+    fn draw_triangle(buffer: &mut[u8], buffer_size: &Vec2, vertices: &[Vec3; 3], colors: &[Vec4; 3]) {
+
+        let vertices_2d = &[
+            vertices[0].clone().xy(),
+            vertices[1].clone().xy(),
+            vertices[2].clone().xy(),
+        ];
+
+        let colors = &[
+            colors[0].mul(255.0),
+            colors[1].mul(255.0),
+            colors[2].mul(255.0),
+        ];
+
+
+        let ((min_x, min_y), (max_x, max_y)) = Self::clip_triangle(vertices_2d, buffer_size);
+
+        for y in min_y..max_y {  
+            for x in min_x..max_x {
+  
+                let point = &Vec2::new(x as f32 + 0.5, y as f32 + 0.5);
+   
+                if Self::is_inside_triangle(vertices_2d, point) {
+   
+                    let weights = &Self::calc_barycentric(vertices_2d, point);
+                    let color = Self::mul_barycentric_v4(weights, colors);
+
+                    let pixel_index = (y * buffer_size.x as usize + x) * 4; 
+
+                    buffer[pixel_index + 0] = color.x as u8;
+                    buffer[pixel_index + 1] = color.y as u8;
+                    buffer[pixel_index + 2] = color.z as u8;
+                    buffer[pixel_index + 3] = color.w as u8;
+                }
+            }
+        }
+    }
+
+
+    fn clip_triangle(vertices_2d: &[Vec2], buffer_size: &Vec2) -> ((usize, usize), (usize, usize)) {
+
+        let mut min = vertices_2d[0].clone();
+        let mut max = vertices_2d[0].clone();
+
+        for v in vertices_2d.iter().skip(1) {
+            min = min.min(v.clone());
+            max = max.max(v.clone());
+        }
+
+
+        let min = min.max(Vec2::new(0.0, 0.0).clone()).round();
+        let max = max.min(buffer_size.clone()).round();
+
+        return ((min.x as usize, min.y as usize), (max.x as usize, max.y as usize));
+    }
+
+
+    fn calc_barycentric(vertices: &[Vec2], point: &Vec2) -> [f32; 3] {
+
+        let w_div: f32 = (vertices[1].y - vertices[2].y) * (vertices[0].x - vertices[2].x) + (vertices[2].x - vertices[1].x) * (vertices[0].y - vertices[2].y);
+
+        let w1: f32 =  ((vertices[1].y - vertices[2].y) * (point.x - vertices[2].x) + (vertices[2].x - vertices[1].x) * (point.y - vertices[2].y)) / w_div;
+        let w2: f32 = ((vertices[2].y - vertices[0].y) * (point.x - vertices[2].x) + (vertices[0].x - vertices[2].x) * (point.y - vertices[2].y)) / w_div;
+        let w3: f32 = 1.0 - w1 - w2;
+
+        [w1, w2, w3]
+    }
+
+    
+    fn mul_barycentric_v2(weights: &[f32], vecs: &[Vec2; 3]) -> Vec2 {
+        
+        let mut new_vector = Vec2::default();
+
+        for i in 0..3 {
+            new_vector.x += vecs[i].x * weights[i];
+            new_vector.y += vecs[i].y * weights[i];
+        }
+
+        new_vector
+    }
+
+    fn mul_barycentric_v3(weights: &[f32], vecs: &[Vec3; 3]) -> Vec3 {
+        
+        let mut new_vector = Vec3::default();
+
+        for i in 0..3 {
+            new_vector.x += vecs[i].x * weights[i];
+            new_vector.y += vecs[i].y * weights[i];
+            new_vector.z += vecs[i].z * weights[i];
+        }
+
+        new_vector
+    }
+
+    fn mul_barycentric_v4(weights: &[f32], vecs: &[Vec4; 3]) -> Vec4 {
+        
+        let mut new_vector = Vec4::default();
+
+        for i in 0..3 {
+            new_vector.x += vecs[i].x * weights[i];
+            new_vector.y += vecs[i].y * weights[i];
+            new_vector.z += vecs[i].z * weights[i];
+            new_vector.w += vecs[i].w * weights[i];
+        }
+
+        new_vector
     }
 }

@@ -1,15 +1,34 @@
+use std::{collections::HashMap};
+
 use winit::{
     event::{Event},
     event_loop::{ControlFlow, EventLoop},
 };
 
-pub use pixel_renderer::PixelRenderer;
+
+use pixel_renderer::PixelRenderer;
+
+pub use assets::*;
+pub use objects::*;
 
 mod pixel_renderer;
-pub mod objects;
-pub mod assets;
+mod objects;
+mod assets;
 
 
+pub struct Engine {
+    pub assets: Assets,
+    objects: Vec<Box<dyn objects::Object>>,
+}
+
+impl Engine {
+    fn new() -> Self {
+        Self {
+            assets: Assets::new(),
+            objects: Vec::new(),
+        }
+    }
+}
 
 pub trait GameLoop {
     fn init(&mut self, engine: &mut Engine) {}
@@ -17,25 +36,6 @@ pub trait GameLoop {
 
     //fn on_key_down(keycode) {}
     //fn on_key_up(keycode) {}
-}
-
-pub struct Assets {
-    //models:...
-    //meshes...
-    //textures...
-}
-
-pub struct Engine {
-    //assets...
-    //objects...
-}
-
-impl Engine {
-    fn new() -> Self {
-        Self {
-
-        }
-    }
 }
 
 
