@@ -16,13 +16,15 @@ use glam::{Vec4, Vec3, Vec2, IVec2, Vec2Swizzles, Vec3Swizzles, Vec4Swizzles};
 
 
 
-const MIN_BUFFER_SIDE: u32 = 500;
+const MIN_BUFFER_SIDE: u32 = 2000;
+
 
 pub struct PixelRenderer {
     window: Window,
     context: pixels::Pixels,
 
     buffer_size: LogicalSize<u32>,
+    time: std::time::SystemTime,
 }
 
 
@@ -44,9 +46,9 @@ impl PixelRenderer {
         .build().unwrap();
 
         context.set_clear_color(Color {
-            r: 1.0,
-            g: 1.0,
-            b: 1.0,
+            r: 0.0,
+            g: 0.0,
+            b: 0.0,
             a: 1.0,
         });
 
@@ -56,6 +58,7 @@ impl PixelRenderer {
             context,
 
             buffer_size: LogicalSize::default(),
+            time: std::time::SystemTime::now(),
         };
 
         renderer.resize(surface_size);
@@ -76,7 +79,7 @@ impl PixelRenderer {
         self.context.resize_buffer(new_buffer_width, new_buffer_height);
 
         self.buffer_size = LogicalSize::new(new_buffer_width, new_buffer_height);
-        // BUG(from pixels.rs): buffer only scales by 1x 2x 4x according to the surface area.
+        //BUG(from pixels.rs): buffer only scales by 1x 2x 4x according to the surface area.
     }
 
     pub fn window_event(&mut self, event: WindowEvent, control_flow: &mut ControlFlow) {
@@ -100,12 +103,19 @@ impl PixelRenderer {
     pub fn render(&mut self){
 
         let buffer = self.context.get_frame();
+        buffer.fill(0);
                     
 
         let mut vertices = [
-            Vec3::new(0.9, 0.1, 0.0),
-            Vec3::new(0.3, 0.1, 0.0),
-            Vec3::new(0.8, 0.3, 0.0),
+            Vec3::new(0.5, 0.7, 0.0),
+            Vec3::new(0.3, 0.4, 0.0),
+            Vec3::new(0.7, 0.4, 0.0),
+        ];
+
+        let mut vertices2 = [
+            Vec3::new(0.3, 0.4, 0.0),
+            Vec3::new(0.5, 0.1, 0.0),
+            Vec3::new(0.7, 0.4, 0.0),
         ];
 
         for vec in vertices.iter_mut() {
@@ -113,16 +123,43 @@ impl PixelRenderer {
             vec.y *= self.buffer_size.height as f32;
         }
 
+        for vec in vertices2.iter_mut() {
+            vec.x *= self.buffer_size.width as f32;
+            vec.y *= self.buffer_size.height as f32;
+        }
+
+        //test only
+        for vec in vertices.iter_mut() {
+            vec.x += (self.time.elapsed().unwrap().as_secs_f32() * PI * 0.2).cos() * 200.0;
+            vec.y += (self.time.elapsed().unwrap().as_secs_f32() * PI * 0.2).sin() * 200.0;
+        }
+
+        //test only
+        for vec in vertices2.iter_mut() {
+            vec.x += (self.time.elapsed().unwrap().as_secs_f32() * PI * 0.2).cos() * 200.0;
+            vec.y += (self.time.elapsed().unwrap().as_secs_f32() * PI * 0.2).sin() * 200.0;
+        }
+
         let colors = [
-            Vec4::new(0.498, 1.0, 0.83, 1.0),
-            Vec4::new(1.0, 0.71, 0.756, 1.0),
-            Vec4::new(1.0, 1.0, 0.0, 1.0),
+            Vec4::new(1.0, 0.2, 0.0, 1.0),
+            Vec4::new(0.2, 0.0, 0.8, 1.0),
+            Vec4::new(0.0, 1.0, 0.2, 1.0),
         ];
+
+        let colors2 = [
+            Vec4::new(0.2, 0.0, 0.8, 1.0),
+            Vec4::new(1.0, 1.0, 1.0, 1.0),
+            Vec4::new(0.0, 1.0, 0.2, 1.0),
+        ];
+
+
+        let settings = RenderingSettings { front_face: FrontFace::CounterClockWise };
 
         
         let buffer_size = Vec2::new(self.buffer_size.width as f32, self.buffer_size.height as f32);
         
-        Self::draw_triangle(buffer, &buffer_size, &vertices, &colors);
+        Self::draw_triangle(buffer, &buffer_size, &vertices, &colors, &settings);
+        Self::draw_triangle(buffer, &buffer_size, &vertices2, &colors2, &settings);
     
         self.context.render().unwrap();
         self.window.request_redraw();
@@ -130,8 +167,8 @@ impl PixelRenderer {
 
 
 
-    fn is_inside_triangle(vertices_2d: &[Vec2], point: &Vec2) -> bool {
-        
+    fn is_inside_triangle(vertices_2d: &[Vec2], point: &Vec2, front_face: &FrontFace) -> bool {
+
         fn create_vector(vertice_1: &Vec2, vertice_2: &Vec2) -> Vec2 {
             vertice_2.clone().sub(vertice_1.clone())
         }
@@ -157,7 +194,7 @@ impl PixelRenderer {
             angle
         }
 
-   
+
         for index in 0 .. vertices_2d.len() {
 
             let vector_side = create_vector(&vertices_2d[index], 
@@ -168,9 +205,16 @@ impl PixelRenderer {
 
             let angle_side = get_angle(&vector_side);
             let angle_point = get_angle(&vector_point);
+
+            let mut angle_dif = angle_point - angle_side;
+            if angle_dif < 0.0 { angle_dif += PI * 2.0; }
+
+
+            if let FrontFace::ClockWise = front_face  { angle_dif = PI * 2.0 - angle_dif; }
+            else {}
    
             
-            if angle_side - angle_point < 0.0 {
+            if angle_dif > PI {
                 return false
             }
         }
@@ -179,7 +223,7 @@ impl PixelRenderer {
     }
     
 
-    fn draw_triangle(buffer: &mut[u8], buffer_size: &Vec2, vertices: &[Vec3; 3], colors: &[Vec4; 3]) {
+    fn draw_triangle(buffer: &mut[u8], buffer_size: &Vec2, vertices: &[Vec3; 3], colors: &[Vec4; 3], settings: &RenderingSettings) {
 
         let vertices_2d = &[
             vertices[0].clone().xy(),
@@ -201,7 +245,7 @@ impl PixelRenderer {
   
                 let point = &Vec2::new(x as f32 + 0.5, y as f32 + 0.5);
    
-                if Self::is_inside_triangle(vertices_2d, point) {
+                if Self::is_inside_triangle(vertices_2d, point, &settings.front_face) {
    
                     let weights = &Self::calc_barycentric(vertices_2d, point);
                     let color = Self::mul_barycentric(weights, colors);
@@ -260,4 +304,14 @@ impl PixelRenderer {
 
         new_vector
     } 
+}
+
+
+struct RenderingSettings {
+    pub front_face: FrontFace,
+}
+
+enum FrontFace {
+    ClockWise,
+    CounterClockWise,
 }
