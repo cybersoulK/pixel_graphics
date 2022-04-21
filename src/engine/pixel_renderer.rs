@@ -1,5 +1,5 @@
 use std::f32::consts::PI;
-use std::ops::{Sub, Mul};
+use std::ops::{Sub, Mul, AddAssign};
 
 use winit::dpi::{LogicalSize, PhysicalSize};
 use winit::window::{WindowBuilder, Window};
@@ -16,7 +16,7 @@ use glam::{Vec4, Vec3, Vec2, IVec2, Vec2Swizzles, Vec3Swizzles, Vec4Swizzles};
 
 
 
-const MIN_BUFFER_SIDE: u32 = 2000;
+const MIN_BUFFER_SIDE: u32 = 500;
 
 pub struct PixelRenderer {
     window: Window,
@@ -204,7 +204,7 @@ impl PixelRenderer {
                 if Self::is_inside_triangle(vertices_2d, point) {
    
                     let weights = &Self::calc_barycentric(vertices_2d, point);
-                    let color = Self::mul_barycentric_v4(weights, colors);
+                    let color = Self::mul_barycentric(weights, colors);
 
                     let pixel_index = (y * buffer_size.x as usize + x) * 4; 
 
@@ -247,43 +247,17 @@ impl PixelRenderer {
         [w1, w2, w3]
     }
 
-    
-    fn mul_barycentric_v2(weights: &[f32], vecs: &[Vec2; 3]) -> Vec2 {
-        
-        let mut new_vector = Vec2::default();
+
+    fn mul_barycentric<V: Mul<f32, Output = V> + AddAssign + Clone + Default>(weights: &[f32], vecs: &[V; 3]) -> V {
+
+        let mut new_vector = V::default();
 
         for i in 0..3 {
-            new_vector.x += vecs[i].x * weights[i];
-            new_vector.y += vecs[i].y * weights[i];
+
+            let product = vecs[i].clone().mul(weights[i]);
+            new_vector.add_assign(product);
         }
 
         new_vector
-    }
-
-    fn mul_barycentric_v3(weights: &[f32], vecs: &[Vec3; 3]) -> Vec3 {
-        
-        let mut new_vector = Vec3::default();
-
-        for i in 0..3 {
-            new_vector.x += vecs[i].x * weights[i];
-            new_vector.y += vecs[i].y * weights[i];
-            new_vector.z += vecs[i].z * weights[i];
-        }
-
-        new_vector
-    }
-
-    fn mul_barycentric_v4(weights: &[f32], vecs: &[Vec4; 3]) -> Vec4 {
-        
-        let mut new_vector = Vec4::default();
-
-        for i in 0..3 {
-            new_vector.x += vecs[i].x * weights[i];
-            new_vector.y += vecs[i].y * weights[i];
-            new_vector.z += vecs[i].z * weights[i];
-            new_vector.w += vecs[i].w * weights[i];
-        }
-
-        new_vector
-    }
+    } 
 }
