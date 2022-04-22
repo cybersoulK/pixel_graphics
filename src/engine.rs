@@ -31,8 +31,8 @@ impl Engine {
 }
 
 pub trait GameLoop {
-    fn init(&mut self, engine: &mut Engine) {}
-    fn update(&mut self, engine: &mut Engine) {}
+    fn init(&mut self, engine: &mut Engine);
+    fn update(&mut self, engine: &mut Engine);
 
     //fn on_key_down(keycode) {}
     //fn on_key_up(keycode) {}

@@ -4,17 +4,23 @@ use std::io::{BufReader};
 
 pub use model::Model;
 pub use mesh::Mesh;
+pub use material::Material;
 pub use texture::Texture;
+pub use shader::Shader;
 
 mod model;
 mod mesh;
+mod material;
 mod texture;
+mod shader;
 
 
 pub struct Assets {
     models: Resource<Model>,
     meshes: Resource<Mesh>,
+    materials: Resource<Material>,
     textures: Resource<Texture>,
+    shaders: Resource<dyn Shader>,
 }
 
 impl Assets {
@@ -22,7 +28,9 @@ impl Assets {
         Self {
             models: Resource::new(),
             meshes: Resource::new(),
+            materials: Resource::new(),
             textures: Resource::new(),
+            shaders: Resource::new(),
         }
     }
 
@@ -39,7 +47,7 @@ impl Assets {
             let reader = BufReader::new(file);
 
             let model = Model::build(reader, self);
-            self.models.set(path, model);
+            self.models.set(path, Rc::new(model));
 
             let get_model = self.models.get(path).unwrap();
             get_model
@@ -59,10 +67,29 @@ impl Assets {
             let reader = BufReader::new(file);
 
             let mesh = Mesh::build(reader);
-            self.meshes.set(path, mesh);
+            self.meshes.set(path, Rc::new(mesh));
 
             let get_mesh = self.meshes.get(path).unwrap();
             get_mesh
+        }
+    }
+
+    pub fn load_material(&mut self, path: &str, shader: Option<Rc<dyn Shader>>) -> Rc<Material> {
+
+        let material = self.materials.get(path);
+
+        if let Some(material) = material {
+            return material;
+        }
+
+        else {
+            let file = File::open(path).unwrap();
+
+            let material = Material::build(file, shader.expect("Shader is None"));
+            self.materials.set(path, Rc::new(material));
+
+            let get_texture = self.materials.get(path).unwrap();
+            get_texture
         }
     }
 
@@ -78,20 +105,19 @@ impl Assets {
             let file = File::open(path).unwrap();
 
             let texture = Texture::build(file);
-            self.textures.set(path, texture);
+            self.textures.set(path, Rc::new(texture));
 
             let get_texture = self.textures.get(path).unwrap();
             get_texture
         }
     }
-
 }
 
-struct Resource<R> {
+struct Resource<R :?Sized> {
     r: HashMap<String, Rc<R>>,
 }
 
-impl<R> Resource<R> {
+impl<R :?Sized> Resource<R> {
     pub fn new() -> Self {
         Self { r: HashMap::new(), } 
     }
@@ -105,7 +131,7 @@ impl<R> Resource<R> {
         else { return None }
     }
 
-    pub fn set(&mut self, path: &str, r: R) {
-        self.r.insert(path.to_owned(), Rc::new(r));
+    pub fn set(&mut self, path: &str, r: Rc<R>) {
+        self.r.insert(path.to_owned(), r);
     }
 }

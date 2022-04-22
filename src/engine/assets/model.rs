@@ -2,12 +2,12 @@ use std::rc::Rc;
 use std::io::Read;
 
 use super::Assets;
-use super::{Mesh, Texture};
+use super::{Mesh, Material};
 
 
 pub struct Model {
-    mesh: Rc<Mesh>,
-    texture: Rc<Texture>,
+    meshes: Rc<Mesh>,
+    //material: Rc<Material>,
 }
 
 impl Model {
@@ -16,12 +16,12 @@ impl Model {
         let mesh_path = "";
         let texture_path = "";
 
-        let mesh = assets.load_mesh(mesh_path);
-        let texture = assets.load_texture(texture_path);
+        let meshes = assets.load_mesh(mesh_path);
+        //let material = assets.load_material(texture_path, Rc<>); //TODO: shader has to be imported somehow
 
         Self {
-            mesh,
-            texture,
+            meshes,
+            //material,
         }
     }
 }

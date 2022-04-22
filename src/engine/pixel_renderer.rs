@@ -169,8 +169,8 @@ impl PixelRenderer {
 
     fn is_inside_triangle(vertices_2d: &[Vec2], point: &Vec2, front_face: &FrontFace) -> bool {
 
-        fn create_vector(vertice_1: &Vec2, vertice_2: &Vec2) -> Vec2 {
-            vertice_2.clone().sub(vertice_1.clone())
+        fn create_vector(vertex_1: &Vec2, vertex_2: &Vec2) -> Vec2 {
+            vertex_2.clone().sub(vertex_1.clone())
         }
 
         fn get_angle(vec: &Vec2) -> f32 {

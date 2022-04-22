@@ -7,9 +7,6 @@ pub struct Texture {
 }
 
 impl Texture {
-}
-
-impl Texture {
     pub fn build(file: File) -> Self {
 
         let buf_reader = BufReader::new(file);

@@ -1098,6 +1098,7 @@ dependencies = [
  "image",
  "pixels",
  "quad-rand",
+ "tobj",
  "winit",
 ]
 
@@ -1389,6 +1390,15 @@ dependencies = [
  "flate2",
  "jpeg-decoder",
  "weezl",
+]
+
+[[package]]
+name = "tobj"
+version = "3.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "33477e8d090573560f104bb924ce29e92442a064404b21be6ea59a05c95e0e66"
+dependencies = [
+ "ahash",
 ]
 
 [[package]]
