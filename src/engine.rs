@@ -1,4 +1,6 @@
+use std::string::Drain;
 use std::{collections::HashMap, rc::Rc};
+use std::any::Any;
 
 use winit::{
     event::{Event},
@@ -6,12 +8,12 @@ use winit::{
 };
 
 
-use pixel_renderer::PixelRenderer;
+use renderer::PixelRenderer;
 
 pub use assets::*;
 pub use objects::*;
 
-mod pixel_renderer;
+mod renderer;
 mod objects;
 mod assets;
 
@@ -45,10 +47,13 @@ impl Engine {
 
     pub fn add_object(&mut self, object: Rc<dyn Object>) {
 
+        self.objects.push(object);
 
 
-        //objects: Vec<Rc<dyn Object>>,
-        //drawables: Vec<Rc<DrawableObject>>,
+        let any: Rc<dyn Any> = Rc::clone(&object);
+        let drawable: Option<DrawableObject> = any.downcast_ref();
+
+        if drawable.is_some() { self.drawables.push(drawable); }
     }
 }
 
