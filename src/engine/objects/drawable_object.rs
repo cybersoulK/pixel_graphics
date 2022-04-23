@@ -4,9 +4,9 @@ use super::{Object, Transform};
 use crate::engine::assets::Model;
 
 pub struct DrawableObject {
-    transform: Transform,
+    pub transform: Transform,
 
-    model: Rc<Model>,
+    pub model: Rc<Model>,
 }
 
 impl DrawableObject {

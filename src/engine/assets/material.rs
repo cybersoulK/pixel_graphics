@@ -1,6 +1,6 @@
 use std::{io::Read, rc::Rc};
 
-use super::{Texture, Shader};
+use super::{Assets, Texture, Shader};
 
 
 pub struct Material {
@@ -9,19 +9,20 @@ pub struct Material {
 }
 
 impl Material {
-    pub fn new(textures: Vec<Rc<Texture>>, shader: Rc<dyn Shader>) -> Self{
-        Self {
+    pub fn new(textures: Vec<Rc<Texture>>, shader: Rc<dyn Shader>) -> Rc<Self> {
+        Rc::new(Self {
             textures,
             shader,
-        }
+        })
     }
-    pub fn build<R: Read>(input: R, shader: Rc<dyn Shader>) -> Self {
+    pub fn build<R: Read>(input: R, assets: &Assets) -> Rc<Self> {
 
         let textures = Vec::new();
+        let shader = assets.load_shader("");
 
-        Self {
+        Rc::new(Self {
             textures,
             shader,
-        }
+        })
     }
 }

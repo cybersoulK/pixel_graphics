@@ -1,3 +1,4 @@
+use core::panic;
 use std::{rc::Rc, collections::HashMap};
 use std::fs::File;
 use std::io::{BufReader};
@@ -36,18 +37,18 @@ impl Assets {
 
     pub fn load_model(&mut self, path: &str) -> Rc<Model> {
 
-        let model = self.models.get(path);
-
-        if let Some(model) = model {
+        if let Some(model) = self.models.get(path) {
             return model;
         }
 
         else {
+            Self::check_path(path);
+
             let file = File::open(path).unwrap();
             let reader = BufReader::new(file);
 
             let model = Model::build(reader, self);
-            self.models.set(path, Rc::new(model));
+            self.models.set(path, model);
 
             let get_model = self.models.get(path).unwrap();
             get_model
@@ -56,80 +57,138 @@ impl Assets {
 
     pub fn load_mesh(&mut self, path: &str) -> Rc<Mesh> {
 
-        let mesh = self.meshes.get(path);
-
-        if let Some(mesh) = mesh {
+        if let Some(mesh) = self.meshes.get(path) {
             return mesh;
         }
 
         else {
+            Self::check_path(path);
+
             let file = File::open(path).unwrap();
             let reader = BufReader::new(file);
 
             let mesh = Mesh::build(reader);
-            self.meshes.set(path, Rc::new(mesh));
+            self.meshes.set(path, mesh);
 
             let get_mesh = self.meshes.get(path).unwrap();
             get_mesh
         }
     }
 
-    pub fn load_material(&mut self, path: &str, shader: Option<Rc<dyn Shader>>) -> Rc<Material> {
+    pub fn load_material(&mut self, path: &str) -> Rc<Material> {
 
-        let material = self.materials.get(path);
-
-        if let Some(material) = material {
+        if let Some(material) = self.materials.get(path) {
             return material;
         }
 
         else {
+            Self::check_path(path);
             let file = File::open(path).unwrap();
 
-            let material = Material::build(file, shader.expect("Shader is None"));
-            self.materials.set(path, Rc::new(material));
+            let material = Material::build(file, self);
+            self.materials.set(path, material);
 
-            let get_texture = self.materials.get(path).unwrap();
-            get_texture
+            let get_material = self.materials.get(path).unwrap();
+            get_material
         }
     }
 
     pub fn load_texture(&mut self, path: &str) -> Rc<Texture> {
 
-        let texture = self.textures.get(path);
-
-        if let Some(texture) = texture {
+        if let Some(texture) = self.textures.get(path) {
             return texture;
         }
 
         else {
+            Self::check_path(path);
+
             let file = File::open(path).unwrap();
 
             let texture = Texture::build(file);
-            self.textures.set(path, Rc::new(texture));
+            self.textures.set(path, texture);
 
             let get_texture = self.textures.get(path).unwrap();
             get_texture
         }
     }
 
+    pub fn load_shader(&mut self, path: &str) -> Rc<dyn Shader> {
 
-    pub fn create_model(&mut self, id: &str, model: Model){
+        if let Some(shader) = self.shaders.get(path) {
+            return shader;
+        }
 
-        if id.is_empty() { panic!("id must not be empty"); }
-        if id.starts_with("#") == false { panic!("id first character must be '#'"); }
+        else {
+            Self::check_path(path);
+        }
+    }
+
+    pub fn check_path(path: &str){
+
+        if path.is_empty() { panic!("path must not be empty"); }
+        if path.starts_with("#") == true { panic!("path(id) not found: {}", path); }
+    }
 
 
-        let model = self.models.get(id);
+    pub fn create_model(&mut self, id: &str, model: Rc<Model>){
 
-        if let Some(model) = model {
+        Self::check_id(id);
+
+        if self.models.get(id).is_some() {
             panic!("Model created twice!");
         }
 
+        self.models.set(id, model);
+    }
 
+    pub fn create_mesh(&mut self, id: &str, mesh: Rc<Mesh>){
+
+        Self::check_id(id);
+
+        if self.meshes.get(id).is_some() {
+            panic!("mesh created twice!");
+        }
+
+        self.meshes.set(id, mesh);
+    }
+
+    pub fn create_material(&mut self, id: &str, material: Rc<Material>){
+
+        Self::check_id(id);
+
+        if self.materials.get(id).is_some() {
+            panic!("material created twice!");
+        }
+
+        self.material.set(id, material);
+    }
+
+    pub fn create_texture(&mut self, id: &str, texture: Rc<Texture>){
+
+        Self::check_id(id);
+
+        if self.textures.get(id).is_some() {
+            panic!("texture created twice!");
+        }
+
+        self.textures.set(id, texture)
+    }
+
+    pub fn create_shader(&mut self, id: &str, shader: Rc<dyn Shader>){
+
+        Self::check_id(id);
+
+        if self.shaders.get(id).is_some() {
+            panic!("shader created twice!");
+        }
+
+        self.shaders.set(id, shader)
     }
 
     pub fn check_id(id: &str){
-        
+
+        if id.is_empty() { panic!("id must not be empty"); }
+        if id.starts_with("#") == false { panic!("id first character must be '#'"); }
     }
 }
 

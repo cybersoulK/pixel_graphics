@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::io::BufReader;
+use std::rc::Rc;
 
 
 pub struct Texture {
@@ -7,13 +8,13 @@ pub struct Texture {
 }
 
 impl Texture {
-    pub fn build(file: File) -> Self {
+    pub fn build(file: File) -> Rc<Self> {
 
         let buf_reader = BufReader::new(file);
         let image_source = image::load(buf_reader, image::ImageFormat::Png).unwrap();
 
-        Self {
+        Rc::new(Self {
             image_source
-        }
+        })
     }
 }
