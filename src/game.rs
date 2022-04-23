@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use pixel_graphics::*;
 
 
@@ -22,17 +24,15 @@ impl GameLoop for Game {
             ..Default::default() 
         };
 
-        let cube_texture = engine.assets.load_texture("");
-
         let shader1 = shader1::Shader1::new();
-        engine.assets.create_shader("#shader1", cube_shader);
-
+        engine.assets.create_shader("#shader1", shader1);
 
         let cube_shader = engine.assets.load_shader("#shader1");
-        let cube_material = Material::new([cube_texture], cube_shader);
+        /*let cube_texture = engine.assets.load_texture("...");*/  let cube_texture = Default::default();
+        let cube_material = Material::new([cube_texture].to_vec(), cube_shader);
 
-        let cube_model = Model::new([cube_mesh], [cube_material]);
-        let cube = DrawableObject::new(cube_transform, model);
+        let cube_model = Model::new([cube_mesh].to_vec(), [cube_material].to_vec());
+        let cube = DrawableObject::new(cube_transform, cube_model);
 
         engine.add_object(Rc::new(cube));
 

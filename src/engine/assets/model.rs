@@ -19,7 +19,7 @@ impl Model {
         })
     }
 
-    pub fn build<R: Read>(input: R, assets: &Assets) -> Rc<Self> {
+    pub fn build<R: Read>(input: R, assets: &mut Assets) -> Rc<Self> {
 
         let mesh_path = "";
         let texture_path = "";
@@ -37,22 +37,27 @@ impl Model {
     }
 }
 
+pub trait ToRcIterator {
 
-impl IntoIterator for Model {
-    type Item = (Rc<Mesh>, Rc<Material>);
-    type IntoIter = ModelIterator;
+    type Item;
+    type IntoIter;
 
-    fn into_iter(self) -> Self::IntoIter {
-        ModelIterator {
-            model: self,
+    fn into_iter(&self) -> Self::IntoIter;
+}
+
+
+pub struct ModelIterator {
+    model: Rc<Model>,
+    index: usize,
+}
+
+impl ModelIterator {
+    pub fn new(model: &Rc<Model>) -> Self {
+        Self {
+            model: Rc::clone(model),
             index: 0,
         }
     }
-}
-
-struct ModelIterator {
-    model: Model,
-    index: usize,
 }
 
 impl Iterator for ModelIterator {
@@ -60,12 +65,12 @@ impl Iterator for ModelIterator {
     
     fn next(&mut self) -> Option<(Rc<Mesh>, Rc<Material>)> {
         
-        let mesh = self.model.meshes[self.index];
-        let material = self.model.materials[mesh.get_material_index()];
+        let mesh = Rc::clone(&self.model.meshes[self.index]);
+        let material = Rc::clone(&self.model.materials[mesh.get_material_index()]);
 
 
         self.index += 1;
 
-        Some((mesh, material))
+        Some((mesh, material)) //TODO: has to be cloned. want to check compile error
     }
 }

@@ -3,8 +3,8 @@ use std::{rc::Rc, collections::HashMap};
 use std::fs::File;
 use std::io::{BufReader};
 
-pub use model::Model;
-pub use mesh::Mesh;
+pub use model::{Model, ModelIterator};
+pub use mesh::{Mesh, MeshIterator};
 pub use material::Material;
 pub use texture::Texture;
 pub use shader::Shader;
@@ -13,7 +13,7 @@ mod model;
 mod mesh;
 mod material;
 mod texture;
-mod shader;
+pub mod shader;
 
 
 pub struct Assets {
@@ -62,7 +62,7 @@ impl Assets {
         }
 
         else {
-            Self::check_path(path);
+            panic!("path(id) not found: {}", path);
         }
     }
 
@@ -110,7 +110,7 @@ impl Assets {
         }
 
         else {
-            Self::check_path(path);
+            panic!("path(id) not found: {}", path);
         }
     }
 
@@ -151,7 +151,7 @@ impl Assets {
             panic!("material created twice!");
         }
 
-        self.material.set(id, material);
+        self.materials.set(id, material);
     }
 
     pub fn create_texture(&mut self, id: &str, texture: Rc<Texture>){

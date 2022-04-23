@@ -1,9 +1,11 @@
+use std::rc::Rc;
+
 use glam::{Vec3, Vec2};
 
 use super::Mesh;
 
 
-fn get_cube() -> Mesh {
+pub fn get_cube() -> Rc<Mesh> {
 
     let vertices = [
             Vec3::new(0.0,0.0,0.0), //0
@@ -65,7 +67,7 @@ fn get_cube() -> Mesh {
     023 031 //bottom
     054 015   //front
     275 237  //right
-    246 204 //left
+    246 204 //left <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <#
     367 326 // back
     476 457 //top
 
@@ -77,7 +79,12 @@ fn get_cube() -> Mesh {
     0/3/2 0/1/3
     */
 
-    let mesh = Mesh::new(vertices, uv_textures, norms, indexes, 0);
+    let mesh = Mesh::new(
+        vertices.to_vec(), 
+        uv_textures.to_vec(), 
+        norms.to_vec(), 
+        indexes.to_vec(), 
+        0);
 
     mesh
 }

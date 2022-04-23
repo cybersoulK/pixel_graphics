@@ -1,6 +1,4 @@
-use std::string::Drain;
-use std::{collections::HashMap, rc::Rc};
-use std::any::Any;
+use std::{rc::Rc};
 
 use winit::{
     event::{Event},
@@ -23,6 +21,8 @@ pub struct Engine {
 
     objects: Vec<Rc<dyn Object>>,
     drawables: Vec<Rc<DrawableObject>>,
+    lights: Vec<Rc<Light>>,
+
     camera: Rc<Camera>,
 }
 
@@ -30,8 +30,11 @@ impl Engine {
     pub fn new() -> Self {
         Self {
             assets: Assets::new(),
+
             objects: Vec::new(),
             drawables: Vec::new(),
+            lights: Vec::new(),
+
             camera: Default::default(),
         }
     }
@@ -48,12 +51,18 @@ impl Engine {
     pub fn add_object(&mut self, object: Rc<dyn Object>) {
 
         self.objects.push(object);
+    } 
 
+    pub fn add_drawable(&mut self, drawable: Rc<DrawableObject>) {
 
-        let any: Rc<dyn Any> = Rc::clone(&object);
-        let drawable: Option<DrawableObject> = any.downcast_ref();
+        self.objects.push(Rc::<DrawableObject>::clone(&drawable));
+        self.drawables.push(Rc::clone(&drawable));
+    }
 
-        if drawable.is_some() { self.drawables.push(drawable); }
+    pub fn add_light(&mut self, light: Rc<Light>) {
+
+        self.objects.push(Rc::<Light>::clone(&light));
+        self.lights.push(Rc::clone(&light));
     }
 }
 
@@ -89,7 +98,7 @@ pub fn init<T>(mut game_loop: T)
             Event::MainEventsCleared => {
 
                 game_loop.update(&mut engine);
-                renderer.render(&engine.camera, &engine.objects); //&engine.objects
+                renderer.render(&engine.camera, &engine.drawables, &engine.lights); //&engine.objects
             },
             _ => ()
         }

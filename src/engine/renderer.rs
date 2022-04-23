@@ -16,7 +16,8 @@ use pixels::wgpu::{PowerPreference, RequestAdapterOptions, Color};
 use glam::{Vec4, Vec3, Vec2, Vec3Swizzles};
 
 
-use super::{Camera, Object, DrawableObject};
+use super::{ModelIterator, MeshIterator};
+use super::{Camera, DrawableObject, Light};
 
 
 
@@ -113,7 +114,7 @@ impl PixelRenderer {
         }
     }
 
-    pub fn render(&mut self, camera: &Rc<Camera>, drawables: &Vec<Rc<DrawableObject>>){
+    pub fn render(&mut self, camera: &Rc<Camera>, drawables: &Vec<Rc<DrawableObject>>, lights: &Vec<Rc<Light>>){
 
         let buffer = self.context.get_frame();
         buffer.fill(0);
@@ -126,15 +127,16 @@ impl PixelRenderer {
 
         for obj in drawables {
 
-            let model = obj.model;
-            let meshes = model.mes;
+            let model = Rc::clone(&obj.model);
             
-            for (mesh, material) in model.into_iter() {
+            for (mesh, material) in ModelIterator::new(&model) {
                 
-                for (vertices, uv_textures, norms) in mesh {
+                for (vertices, uv_textures, norms) in MeshIterator::new(&mesh) {
 
                     let shader = material.get_shader();
-                    Self::draw_triangle(buffer, &buffer_size, &vertices, &colors, &settings);
+
+                    shader.vertex_shader(Rc::clone(&material));
+                    //Self::draw_triangle(buffer, &buffer_size, &vertices, &colors, &settings);
                 }
             }
         }

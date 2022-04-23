@@ -18,3 +18,11 @@ impl Texture {
         })
     }
 }
+
+impl Default for Texture {
+    fn default() -> Self {
+        Self{
+            image_source: image::DynamicImage::default(),
+        }
+    }
+}

@@ -2,6 +2,7 @@ use std::f32::consts::PI;
 
 use super::{Object, Transform};
 
+
 pub struct Camera {
     transform: Transform,
 

@@ -42,21 +42,19 @@ impl Mesh {
     }
 }
 
-impl IntoIterator for Mesh {
-    type Item = ([Vec3; 3], [Vec2; 3], [Vec3; 3]);
-    type IntoIter = MeshIterator;
 
-    fn into_iter(self) -> Self::IntoIter {
-        MeshIterator {
-            mesh: self,
+pub struct MeshIterator {
+    mesh: Rc<Mesh>,
+    index: usize,
+}
+
+impl MeshIterator {
+    pub fn new(mesh: &Rc<Mesh>) -> Self {
+        Self {
+            mesh: Rc::clone(mesh),
             index: 0,
         }
     }
-}
-
-struct MeshIterator {
-    mesh: Mesh,
-    index: usize,
 }
 
 impl Iterator for MeshIterator {

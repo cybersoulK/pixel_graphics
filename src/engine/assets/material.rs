@@ -15,7 +15,7 @@ impl Material {
             shader,
         })
     }
-    pub fn build<R: Read>(input: R, assets: &Assets) -> Rc<Self> {
+    pub fn build<R: Read>(input: R, assets: &mut Assets) -> Rc<Self> {
 
         let textures = Vec::new();
         let shader = assets.load_shader("");
@@ -27,6 +27,6 @@ impl Material {
     }
 
     pub fn get_shader(&self) -> Rc<dyn Shader> {
-        self.shader
+        Rc::clone(&self.shader)
     }
 }
