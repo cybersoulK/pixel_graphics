@@ -1,9 +1,11 @@
-pub use std::rc::Rc;
-
-pub use super::Material;
-pub use glam::vec3;
+use super::super::ShaderPipe;
 
 pub trait Shader {
-    fn vertex_shader(&self, material: Rc<Material>);
-    fn fragment_shader(&self);
+    fn execute(&self, shader_pipe: &mut ShaderPipe) {
+        self.vertex_shader(&mut shader_pipe);
+        self.fragment_shader(&mut shader_pipe);
+    }
+
+    fn vertex_shader(&self, shader_pipe: &mut ShaderPipe);
+    fn fragment_shader(&self, shader_pipe: &mut ShaderPipe);
 }

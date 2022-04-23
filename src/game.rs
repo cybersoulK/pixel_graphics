@@ -19,7 +19,7 @@ impl GameLoop for Game {
 
         let cube_mesh = cube::get_cube();
         let cube_transform = Transform { 
-            position: glam::vec3(100.0, 100.0, 100.0), 
+            translation: glam::vec3(100.0, 100.0, 100.0), 
             scale: glam::vec3(3.0, 2.0, 1.0), 
             ..Default::default() 
         };

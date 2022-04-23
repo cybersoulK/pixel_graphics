@@ -1,4 +1,4 @@
-use super::shader::*;
+use super::ShaderPipe;
 
 
 pub struct Shader1 {
@@ -14,11 +14,13 @@ impl Shader1 {
 }
 
 impl Shader for Shader1 {
-    fn vertex_shader(&self, material: Rc<Material>) {
 
+    fn vertex_shader(&self, shader_pipe: &ShaderPipe) {
+
+        //time: std::time::SystemTime,
     }
 
-    fn fragment_shader(&self) {
+    fn fragment_shader(&self, shader_pipe: &ShaderPipe) {
 
     }
 }

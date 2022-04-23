@@ -13,7 +13,7 @@ mod light;
 
 #[derive(Default)]
 pub struct Transform {
-    pub position: Vec3,
+    pub translation: Vec3,
     pub rotation: EulerRot,
     pub scale: Vec3,
 

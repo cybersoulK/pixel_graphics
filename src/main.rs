@@ -6,5 +6,7 @@ fn main() {
 
     let game = Game {};
 
-    pixel_graphics::init(game);
+    let settings = RenderingSettings { front_face: FrontFace::CounterClockWise };
+
+    pixel_graphics::init(game, settings);
 }

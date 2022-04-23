@@ -5,13 +5,13 @@ use winit::{
     event_loop::{ControlFlow, EventLoop},
 };
 
-
-use renderer::PixelRenderer;
-
+pub use engine_settings::EngineSettings;
+pub use graphics::*;
 pub use assets::*;
 pub use objects::*;
 
-mod renderer;
+mod engine_settings;
+mod graphics;
 mod objects;
 mod assets;
 
@@ -75,13 +75,13 @@ pub trait GameLoop {
 }
 
 
-pub fn init<T>(mut game_loop: T)
+pub fn init<T>(mut game_loop: T, engine_settings: EngineSettings)
     where T: GameLoop + 'static {
 
     let event_loop = EventLoop::new();
 
     let mut engine = Engine::new();
-    let mut renderer = PixelRenderer::new(&event_loop);
+    let mut window = WindowPixel::new(&event_loop);
 
 
     game_loop.init(&mut engine);
@@ -93,12 +93,24 @@ pub fn init<T>(mut game_loop: T)
         
 
         match event {
-            Event::WindowEvent { event, .. } => renderer.window_event(event, control_flow),
+            Event::WindowEvent { event, .. } => window.window_event(event, control_flow),
 
             Event::MainEventsCleared => {
 
                 game_loop.update(&mut engine);
-                renderer.render(&engine.camera, &engine.drawables, &engine.lights); //&engine.objects
+
+
+                let (buffer, buffer_size) = window.get_buffer();
+
+                graphics::render_update(
+                    buffer,
+                    buffer_size,
+                    &engine_settings.rendering_settings,
+                    &engine.camera,
+                    &engine.drawables,
+                    &engine.lights);
+
+                window.refresh();
             },
             _ => ()
         }

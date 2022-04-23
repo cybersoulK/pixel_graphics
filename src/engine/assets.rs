@@ -13,7 +13,7 @@ mod model;
 mod mesh;
 mod material;
 mod texture;
-pub mod shader;
+mod shader;
 
 
 pub struct Assets {
