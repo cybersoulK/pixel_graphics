@@ -31,7 +31,7 @@ impl GameLoop for Game {
         let cube_shader = engine.assets.load_shader("#shader1");
         let cube_material = Material::new([cube_texture], cube_shader);
 
-        let cube_model = Model::new([cube_mesh], [cube_material], [0]);
+        let cube_model = Model::new([cube_mesh], [cube_material]);
         let cube = DrawableObject::new(cube_transform, model);
 
         engine.add_object(Rc::new(cube));

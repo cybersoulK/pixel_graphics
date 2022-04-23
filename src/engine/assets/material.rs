@@ -25,4 +25,8 @@ impl Material {
             shader,
         })
     }
+
+    pub fn get_shader(&self) -> Rc<dyn Shader> {
+        self.shader
+    }
 }

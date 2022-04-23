@@ -77,7 +77,7 @@ fn get_cube() -> Mesh {
     0/3/2 0/1/3
     */
 
-    let mesh = Mesh::new(vertices, uv_textures, norms, indexes);
+    let mesh = Mesh::new(vertices, uv_textures, norms, indexes, 0);
 
     mesh
 }

@@ -124,10 +124,19 @@ impl PixelRenderer {
         let buffer_size = Vec2::new(self.buffer_size.width as f32, self.buffer_size.height as f32);
 
 
-        for obj_rc in drawables {
+        for obj in drawables {
 
-            obj_rc.transform
-            Self::draw_triangle(buffer, &buffer_size, &vertices, &colors, &settings);
+            let model = obj.model;
+            let meshes = model.mes;
+            
+            for (mesh, material) in model.into_iter() {
+                
+                for (vertices, uv_textures, norms) in mesh {
+
+                    let shader = material.get_shader();
+                    Self::draw_triangle(buffer, &buffer_size, &vertices, &colors, &settings);
+                }
+            }
         }
 
 

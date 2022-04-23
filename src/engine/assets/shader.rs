@@ -1,8 +1,8 @@
 use std::rc::Rc;
 
-pub trait Shader {
-    fn new();
+use super::Material;
 
-    fn vertex_shader(&mut self);
+pub trait Shader {
+    fn vertex_shader(&mut self, material: Rc<Material>);
     fn fragment_shader(&mut self);
 }

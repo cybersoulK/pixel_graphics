@@ -36,9 +36,16 @@ impl Mesh {
             material_index: 0
         })
     }
+
+    pub fn get_material_index(&self) -> usize {
+        self.material_index
+    }
 }
 
 impl IntoIterator for Mesh {
+    type Item = ([Vec3; 3], [Vec2; 3], [Vec3; 3]);
+    type IntoIter = MeshIterator;
+
     fn into_iter(self) -> Self::IntoIter {
         MeshIterator {
             mesh: self,
@@ -48,8 +55,8 @@ impl IntoIterator for Mesh {
 }
 
 struct MeshIterator {
-    pub mesh: Rc<Mesh>,
-    pub index: usize,
+    mesh: Mesh,
+    index: usize,
 }
 
 impl Iterator for MeshIterator {

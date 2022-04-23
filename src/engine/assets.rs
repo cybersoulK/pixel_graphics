@@ -63,15 +63,6 @@ impl Assets {
 
         else {
             Self::check_path(path);
-
-            let file = File::open(path).unwrap();
-            let reader = BufReader::new(file);
-
-            let mesh = Mesh::build(reader);
-            self.meshes.set(path, mesh);
-
-            let get_mesh = self.meshes.get(path).unwrap();
-            get_mesh
         }
     }
 
