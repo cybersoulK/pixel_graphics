@@ -1,4 +1,4 @@
-use std::{collections::HashMap};
+use std::{collections::HashMap, rc::Rc};
 
 use winit::{
     event::{Event},
@@ -18,15 +18,37 @@ mod assets;
 
 pub struct Engine {
     pub assets: Assets,
-    objects: Vec<Box<dyn objects::Object>>,
+
+    objects: Vec<Rc<dyn Object>>,
+    drawables: Vec<Rc<DrawableObject>>,
+    camera: Rc<Camera>,
 }
 
 impl Engine {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             assets: Assets::new(),
             objects: Vec::new(),
+            drawables: Vec::new(),
+            camera: Default::default(),
         }
+    }
+
+    pub fn set_camera(&mut self, transform: Transform, near: f32, far: f32, fov: f32) {
+
+        let camera = Rc::new(Camera::new(transform, near, far, fov));
+        let camera_dyn: Rc<dyn Object> = Rc::<Camera>::clone(&camera);
+
+        self.camera = Rc::clone(&camera);
+        self.objects.push(Rc::clone(&camera_dyn));
+    }
+
+    pub fn add_object(&mut self, object: Rc<dyn Object>) {
+
+
+
+        //objects: Vec<Rc<dyn Object>>,
+        //drawables: Vec<Rc<DrawableObject>>,
     }
 }
 
@@ -62,7 +84,7 @@ pub fn init<T>(mut game_loop: T)
             Event::MainEventsCleared => {
 
                 game_loop.update(&mut engine);
-                renderer.render(); //&engine.objects
+                renderer.render(&engine.camera, &engine.objects); //&engine.objects
             },
             _ => ()
         }

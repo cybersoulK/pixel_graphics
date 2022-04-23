@@ -111,6 +111,26 @@ impl Assets {
             get_texture
         }
     }
+
+
+    pub fn create_model(&mut self, id: &str, model: Model){
+
+        if id.is_empty() { panic!("id must not be empty"); }
+        if id.starts_with("#") == false { panic!("id first character must be '#'"); }
+
+
+        let model = self.models.get(id);
+
+        if let Some(model) = model {
+            panic!("Model created twice!");
+        }
+
+
+    }
+
+    pub fn check_id(id: &str){
+        
+    }
 }
 
 struct Resource<R :?Sized> {

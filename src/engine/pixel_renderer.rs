@@ -1,5 +1,6 @@
 use std::f32::consts::PI;
 use std::ops::{Sub, Mul, AddAssign};
+use std::rc::Rc;
 
 use winit::dpi::{LogicalSize, PhysicalSize};
 use winit::window::{WindowBuilder, Window};
@@ -12,7 +13,10 @@ use winit::{
 use pixels::{SurfaceTexture, PixelsBuilder};
 use pixels::wgpu::{PowerPreference, RequestAdapterOptions, Color};
 
-use glam::{Vec4, Vec3, Vec2, IVec2, Vec2Swizzles, Vec3Swizzles, Vec4Swizzles};
+use glam::{Vec4, Vec3, Vec2, Vec3Swizzles};
+
+
+use super::{Camera, Object, DrawableObject};
 
 
 
@@ -25,6 +29,15 @@ pub struct PixelRenderer {
 
     buffer_size: LogicalSize<u32>,
     time: std::time::SystemTime,
+}
+
+struct RenderingSettings {
+    pub front_face: FrontFace,
+}
+
+enum FrontFace {
+    ClockWise,
+    CounterClockWise,
 }
 
 
@@ -100,66 +113,25 @@ impl PixelRenderer {
         }
     }
 
-    pub fn render(&mut self){
+    pub fn render(&mut self, camera: &Rc<Camera>, objects: &Vec<Rc<dyn Object>>){
 
         let buffer = self.context.get_frame();
         buffer.fill(0);
-                    
 
-        let mut vertices = [
-            Vec3::new(0.5, 0.7, 0.0),
-            Vec3::new(0.3, 0.4, 0.0),
-            Vec3::new(0.7, 0.4, 0.0),
-        ];
-
-        let mut vertices2 = [
-            Vec3::new(0.3, 0.4, 0.0),
-            Vec3::new(0.5, 0.1, 0.0),
-            Vec3::new(0.7, 0.4, 0.0),
-        ];
-
-        for vec in vertices.iter_mut() {
-            vec.x *= self.buffer_size.width as f32;
-            vec.y *= self.buffer_size.height as f32;
-        }
-
-        for vec in vertices2.iter_mut() {
-            vec.x *= self.buffer_size.width as f32;
-            vec.y *= self.buffer_size.height as f32;
-        }
-
-        //test only
-        for vec in vertices.iter_mut() {
-            vec.x += (self.time.elapsed().unwrap().as_secs_f32() * PI * 0.2).cos() * 200.0;
-            vec.y += (self.time.elapsed().unwrap().as_secs_f32() * PI * 0.2).sin() * 200.0;
-        }
-
-        //test only
-        for vec in vertices2.iter_mut() {
-            vec.x += (self.time.elapsed().unwrap().as_secs_f32() * PI * 0.2).cos() * 200.0;
-            vec.y += (self.time.elapsed().unwrap().as_secs_f32() * PI * 0.2).sin() * 200.0;
-        }
-
-        let colors = [
-            Vec4::new(1.0, 0.2, 0.0, 1.0),
-            Vec4::new(0.2, 0.0, 0.8, 1.0),
-            Vec4::new(0.0, 1.0, 0.2, 1.0),
-        ];
-
-        let colors2 = [
-            Vec4::new(0.2, 0.0, 0.8, 1.0),
-            Vec4::new(1.0, 1.0, 1.0, 1.0),
-            Vec4::new(0.0, 1.0, 0.2, 1.0),
-        ];
-
-
+        //TODO: settings should be at the sctruct body
         let settings = RenderingSettings { front_face: FrontFace::CounterClockWise };
 
-        
         let buffer_size = Vec2::new(self.buffer_size.width as f32, self.buffer_size.height as f32);
+
+        for obj in objects {
+            let cast: &DrawableObject = obj.as_ref();
+        }
+
+        engine.camera
+        engine.objects
+
         
         Self::draw_triangle(buffer, &buffer_size, &vertices, &colors, &settings);
-        Self::draw_triangle(buffer, &buffer_size, &vertices2, &colors2, &settings);
     
         self.context.render().unwrap();
         self.window.request_redraw();
@@ -304,14 +276,4 @@ impl PixelRenderer {
 
         new_vector
     } 
-}
-
-
-struct RenderingSettings {
-    pub front_face: FrontFace,
-}
-
-enum FrontFace {
-    ClockWise,
-    CounterClockWise,
 }
