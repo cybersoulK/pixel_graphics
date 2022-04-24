@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use super::{Object, Transform};
-use crate::engine::assets::Model;
+use super::super::Model;
 
 
 pub struct DrawableObject {

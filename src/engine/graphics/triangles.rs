@@ -1,9 +1,7 @@
 use std::ops::{Sub, Mul, AddAssign};
 use std::f32::consts::PI;
 
-use glam::{Vec4, Vec3, Vec2, Vec3Swizzles};
-
-use super::RenderingSettings;
+use glam::{Vec2};
 
 
 pub enum FrontFace {
@@ -11,10 +9,11 @@ pub enum FrontFace {
     CounterClockWise,
 }
 
-fn is_inside_triangle(vertices_2d: &[Vec2], point: &Vec2, front_face: &FrontFace) -> bool {
 
-    fn create_vector(vertex_1: &Vec2, vertex_2: &Vec2) -> Vec2 {
-        vertex_2.clone().sub(vertex_1.clone())
+pub fn is_inside_triangle(vertices_2d: &[Vec2; 3], point: &Vec2, front_face: FrontFace) -> bool {
+
+    fn create_vector(vertex_start: &Vec2, vertex_end: &Vec2) -> Vec2 {
+        vertex_end.clone().sub(vertex_start.clone())
     }
 
     fn get_angle(vec: &Vec2) -> f32 {
@@ -38,15 +37,15 @@ fn is_inside_triangle(vertices_2d: &[Vec2], point: &Vec2, front_face: &FrontFace
         angle
     }
 
-
-    for index in 0 .. vertices_2d.len() {
+  
+    for index in 0..vertices_2d.len() {
 
         let vector_side = create_vector(&vertices_2d[index], 
-            if index == 2 { &vertices_2d[0] } else { &vertices_2d[index+1] });
+            if index + 1 < 3 { &vertices_2d[index + 1] } else { &vertices_2d[0] });
 
         let vector_point = create_vector(&vertices_2d[index], &point);
 
-
+            
         let angle_side = get_angle(&vector_side);
         let angle_point = get_angle(&vector_point);
 
@@ -67,46 +66,7 @@ fn is_inside_triangle(vertices_2d: &[Vec2], point: &Vec2, front_face: &FrontFace
 }
 
 
-fn draw_triangle(buffer: &mut[u8], buffer_size: &Vec2, vertices: &[Vec3; 3], colors: &[Vec4; 3], settings: &RenderingSettings) {
-
-    let vertices_2d = &[
-        vertices[0].clone().xy(),
-        vertices[1].clone().xy(),
-        vertices[2].clone().xy(),
-    ];
-
-    let colors = &[
-        colors[0].mul(255.0),
-        colors[1].mul(255.0),
-        colors[2].mul(255.0),
-    ];
-
-
-    let ((min_x, min_y), (max_x, max_y)) = clip_triangle(vertices_2d, buffer_size);
-
-    for y in min_y..max_y {  
-        for x in min_x..max_x {
-
-            let point = &Vec2::new(x as f32 + 0.5, y as f32 + 0.5);
-
-            if is_inside_triangle(vertices_2d, point, &settings.front_face) {
-
-                let weights = &calc_barycentric(vertices_2d, point);
-                let color = mul_barycentric(weights, colors);
-
-                let pixel_index = (y * buffer_size.x as usize + x) * 4; 
-
-                buffer[pixel_index + 0] = color.x as u8;
-                buffer[pixel_index + 1] = color.y as u8;
-                buffer[pixel_index + 2] = color.z as u8;
-                buffer[pixel_index + 3] = color.w as u8;
-            }
-        }
-    }
-}
-
-
-fn clip_triangle(vertices_2d: &[Vec2], buffer_size: &Vec2) -> ((usize, usize), (usize, usize)) {
+pub fn clip_triangle(vertices_2d: &[Vec2; 3], buffer_size: Vec2) -> ((usize, usize), (usize, usize)) {
 
     let mut min = vertices_2d[0].clone();
     let mut max = vertices_2d[0].clone();
@@ -124,7 +84,7 @@ fn clip_triangle(vertices_2d: &[Vec2], buffer_size: &Vec2) -> ((usize, usize), (
 }
 
 
-fn calc_barycentric(vertices: &[Vec2], point: &Vec2) -> [f32; 3] {
+pub fn calc_barycentric(vertices: &[Vec2; 3], point: &Vec2) -> [f32; 3] {
 
     let w_div: f32 = (vertices[1].y - vertices[2].y) * (vertices[0].x - vertices[2].x) + (vertices[2].x - vertices[1].x) * (vertices[0].y - vertices[2].y);
 
@@ -136,7 +96,7 @@ fn calc_barycentric(vertices: &[Vec2], point: &Vec2) -> [f32; 3] {
 }
 
 
-fn mul_barycentric<V: Mul<f32, Output = V> + AddAssign + Clone + Default>(weights: &[f32], vecs: &[V; 3]) -> V {
+pub fn mul_barycentric<V: Mul<f32, Output = V> + AddAssign + Clone + Default>(weights: &[f32; 3], vecs: [V; 3]) -> V {
 
     let mut new_vector = V::default();
 
@@ -147,4 +107,25 @@ fn mul_barycentric<V: Mul<f32, Output = V> + AddAssign + Clone + Default>(weight
     }
 
     new_vector
+}
+
+#[cfg(test)]
+mod tests {
+    use glam::Vec2;
+
+    use super::{is_inside_triangle, FrontFace};
+
+    #[test]
+    fn it_works() {
+        
+        let vertices_2d = &[
+            Vec2::new(0.0, 0.0),
+            Vec2::new(0.0, 300.0),
+            Vec2::new(300.0, 300.0),
+        ];
+
+        let point = &Vec2::new(50.0, 200.0);
+
+        println!("{}", is_inside_triangle(vertices_2d, point, FrontFace::CounterClockWise));
+    }
 }

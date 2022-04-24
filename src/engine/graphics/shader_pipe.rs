@@ -1,17 +1,49 @@
-use std::rc::Rc;
+use std::{rc::Rc};
 
-use glam::{Vec3, Vec2, Mat4};
+use glam::{Vec2, Vec3, Vec4, Mat4};
 
 use super::super::{Light, Material};
 
-pub struct ShaderPipe<'a> {
-    pub vp_matrix: Mat4,
-    pub model_matrix: Mat4,
-    
-    pub vertices: [Vec3; 3],
-    pub uv_textures: [Vec2; 3],
-    pub norms: [Vec3; 3],
+
+#[derive(Clone, Copy)]
+pub struct VertexPipe {
+
+    pub id: usize,
+
+    pub vertex: Vec3,
+    pub uv_mapping: Vec2,
+    pub norm: Vec3,
+
+    pub color: Option<Vec4>,
+
+    pub mvp_matrix: Mat4,
+}
+
+pub struct FragmentPipe<'a> {
+
+    pub vertex: Vec3,
+    pub uv_mapping: Vec2,
+    pub norm: Vec3,
+
+    pub color: Option<Vec4>,
 
     pub material: Rc<Material>,
     pub lights: &'a Vec<Rc<Light>>,
+}
+
+
+
+impl VertexPipe {
+    pub fn transform_option_bundle<T>(array: [Option<T>; 3]) -> Option<[T; 3]> {
+
+        for t in &array {
+            if t.is_none() { return None; }
+        }
+
+        let unwraped_array = array.map(|t| {
+            t.unwrap()
+        });
+
+        Some(unwraped_array)
+    }
 }

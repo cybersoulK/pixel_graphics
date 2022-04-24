@@ -14,8 +14,8 @@ impl Model {
     pub fn new(meshes: Vec<Rc<Mesh>>, materials: Vec<Rc<Material>>) -> Rc<Self> {
 
         Rc::new(Self {
-            meshes: Vec::new(),
-            materials: Vec::new(),
+            meshes,
+            materials,
         })
     }
 
@@ -65,12 +65,15 @@ impl Iterator for ModelIterator {
     
     fn next(&mut self) -> Option<(Rc<Mesh>, Rc<Material>)> {
         
+        if self.index >= self.model.meshes.len() { return None; }
+
+
         let mesh = Rc::clone(&self.model.meshes[self.index]);
         let material = Rc::clone(&self.model.materials[mesh.get_material_index()]);
 
-
+        
         self.index += 1;
-
+        
         Some((mesh, material)) //TODO: has to be cloned. want to check compile error
     }
 }

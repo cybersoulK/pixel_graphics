@@ -5,12 +5,10 @@ use winit::{
     event_loop::{ControlFlow, EventLoop},
 };
 
-pub use engine_settings::EngineSettings;
 pub use graphics::*;
 pub use assets::*;
 pub use objects::*;
 
-mod engine_settings;
 mod graphics;
 mod objects;
 mod assets;
@@ -75,7 +73,7 @@ pub trait GameLoop {
 }
 
 
-pub fn init<T>(mut game_loop: T, engine_settings: EngineSettings)
+pub fn init<T>(mut game_loop: T)
     where T: GameLoop + 'static {
 
     let event_loop = EventLoop::new();
@@ -105,11 +103,10 @@ pub fn init<T>(mut game_loop: T, engine_settings: EngineSettings)
                 graphics::render_update(
                     buffer,
                     buffer_size,
-                    &engine_settings.rendering_settings,
                     &engine.camera,
                     &engine.drawables,
                     &engine.lights);
-
+                    
                 window.refresh();
             },
             _ => ()

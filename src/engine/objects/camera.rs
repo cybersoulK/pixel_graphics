@@ -1,6 +1,6 @@
 use std::f32::consts::PI;
 
-use glam::{Mat4, mat4};
+use glam::{Mat4};
 
 use super::{Object, Transform};
 
@@ -24,16 +24,24 @@ impl Camera {
 
     fn get_view_matrix(&self) -> Mat4 {
 
-        let new_matrix = Mat4::from_scale_rotation_translation(
-            -self.transform.scale, 
-            -glam::Quat::from_euler(self.transform.rotation, a, b, c), 
-            -self.transform.translation);
-
-        new_matrix
+        self.transform.matrix
     }
 
     fn get_projection_matrix(&self) -> Mat4 {
 
+        let matrix_array = [
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0,
+        ];
+
+        let matrix = Mat4::from_cols_array(&matrix_array);
+        //Bowen Rust Learning Task: 
+        //search Mat4:: static functions, and view alternatives to the ::from_cols_array 
+        // 😚💖💖
+
+        matrix
     }
 }
 

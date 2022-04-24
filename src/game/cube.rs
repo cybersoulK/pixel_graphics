@@ -19,7 +19,7 @@ pub fn get_cube() -> Rc<Mesh> {
             Vec3::new(1.0,1.0,1.0), //7
         ];
         
-    let uv_textures = [
+    let uv_mappings = [
         // bottom
         Vec2::new(0.33,1.0),  //0
         Vec2::new(0.66,1.0),  //1
@@ -81,7 +81,7 @@ pub fn get_cube() -> Rc<Mesh> {
 
     let mesh = Mesh::new(
         vertices.to_vec(), 
-        uv_textures.to_vec(), 
+        uv_mappings.to_vec(), 
         norms.to_vec(), 
         indexes.to_vec(), 
         0);

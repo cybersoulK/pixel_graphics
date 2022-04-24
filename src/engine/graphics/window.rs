@@ -12,8 +12,6 @@ use pixels::wgpu::{PowerPreference, RequestAdapterOptions, Color};
 use glam::Vec2;
 
 
-const MIN_BUFFER_SIDE: u32 = 2000;
-
 pub struct WindowPixel {
     window: Window,
     context: pixels::Pixels,
@@ -65,8 +63,8 @@ impl WindowPixel {
 
         let smaller = if new_size.width < new_size.height { new_size.width } else { new_size.height };
         
-        let new_buffer_width = (MIN_BUFFER_SIDE as f32 * new_size.width as f32 / smaller as f32) as u32;
-        let new_buffer_height =  (MIN_BUFFER_SIDE as f32 * new_size.height as f32 / smaller as f32) as u32;
+        let new_buffer_width = (super::settings::MIN_BUFFER_SIDE as f32 * new_size.width as f32 / smaller as f32) as u32;
+        let new_buffer_height =  (super::settings::MIN_BUFFER_SIDE as f32 * new_size.height as f32 / smaller as f32) as u32;
 
         self.context.resize_buffer(new_buffer_width, new_buffer_height);
 
@@ -93,7 +91,7 @@ impl WindowPixel {
     }
 
 
-    pub fn get_buffer(&self) -> (&mut [u8], Vec2) {
+    pub fn get_buffer(&mut self) -> (&mut [u8], Vec2) {
 
         (self.context.get_frame(),
         Vec2::new(self.buffer_size.width as f32, self.buffer_size.height as f32)
