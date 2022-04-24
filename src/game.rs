@@ -46,7 +46,7 @@ impl GameLoop for Game {
             scale: glam::vec3(3.0, 2.0, 1.0), 
             ..Default::default() 
         };
-
+        
         let shader1 = shader1::Shader1::new();
         engine.assets.create_shader("#shader1", shader1);
 
@@ -57,7 +57,7 @@ impl GameLoop for Game {
         let trig_model = Model::new([trig_mesh].to_vec(), [trig_material].to_vec());
         let trig = DrawableObject::new(trig_transform, trig_model);
 
-        engine.add_drawable(Rc::new(trig));
+        engine.add_drawable(Rc::new(trig.clone()));
     }
 
     fn update(&mut self, engine: &mut Engine){

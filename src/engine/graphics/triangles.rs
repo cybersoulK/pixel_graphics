@@ -108,24 +108,3 @@ pub fn mul_barycentric<V: Mul<f32, Output = V> + AddAssign + Clone + Default>(we
 
     new_vector
 }
-
-#[cfg(test)]
-mod tests {
-    use glam::Vec2;
-
-    use super::{is_inside_triangle, FrontFace};
-
-    #[test]
-    fn it_works() {
-        
-        let vertices_2d = &[
-            Vec2::new(0.0, 0.0),
-            Vec2::new(0.0, 300.0),
-            Vec2::new(300.0, 300.0),
-        ];
-
-        let point = &Vec2::new(50.0, 200.0);
-
-        println!("{}", is_inside_triangle(vertices_2d, point, FrontFace::CounterClockWise));
-    }
-}

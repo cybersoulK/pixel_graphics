@@ -2,6 +2,7 @@ use std::{io::Read, rc::Rc};
 
 use glam::{Vec2, Vec3};
 
+
 pub struct Mesh {
     vertices: Vec<Vec3>,
     uv_mappings: Vec<Vec2>,

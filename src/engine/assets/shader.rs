@@ -1,8 +1,8 @@
 use glam::Vec4;
 
-use super::super::{VertexPipe, FragmentPipe};
+use super::super::{CorePipe, VertexPipe, FragmentPipe};
 
 pub trait Shader {
-    fn vertex_shader(&self, inputs: VertexPipe) -> VertexPipe;
-    fn fragment_shader(&self, inputs: FragmentPipe) -> Vec4;
+    fn vertex_shader(&self, core: CorePipe, params: &VertexPipe) -> CorePipe;
+    fn fragment_shader(&self, core: CorePipe, params: &FragmentPipe) -> Vec4;
 }

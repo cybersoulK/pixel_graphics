@@ -1,11 +1,11 @@
-use std::rc::Rc;
+use std::{rc::Rc, time::Duration};
 
 use glam::{Vec2, Vec3, Vec4, Mat4, Vec3Swizzles};
 
 use crate::Material;
 
 use super::super::{
-    {Shader, VertexPipe, FragmentPipe},
+    {Shader, VertexPipe, FragmentPipe, CorePipe},
     {Camera, DrawableObject, Light},
     {ModelIterator, MeshIterator}};
 
@@ -18,7 +18,9 @@ pub fn render_update(
     buffer_size: Vec2,
     camera: &Rc<Camera>,
     drawables: &Vec<Rc<DrawableObject>>,
-    lights: &Vec<Rc<Light>>) {
+    lights: &Vec<Rc<Light>>,
+    time: Duration,
+    ) {
 
 
     buffer.fill(0);
@@ -29,7 +31,6 @@ pub fn render_update(
     for obj in drawables {
 
         let mvp_matrix = obj.transform.matrix * vp_matrix;
-        let mvp_matrix = vp_matrix; //TODO: check for error: should error, moved before
 
         let model = Rc::clone(&obj.model);
 
@@ -38,76 +39,49 @@ pub fn render_update(
             
             let shader = material.get_shader();
             
-            
             for (vertices, uv_mappings, norms) in MeshIterator::new(&mesh) {
                 
                 let colors = [None; 3];
 
-                let vertex_output = 
-                execute_vertex_shader(
-                    &shader,
-                    vertices, 
-                    uv_mappings,
-                    norms,
-                    colors,
-                    mvp_matrix);
-                
-                execute_fragment_shader(
-                    buffer,
-                    buffer_size,
-                    &shader,
-                    vertex_output,
-                    Rc::clone(&material),
+
+                let core_pipe = CorePipe::new_bundle(vertices, uv_mappings, norms, colors); 
+
+                let mut vertex_pipe = VertexPipe {
+                    id: 0,
+                    mvp_matrix,
+                    time,
+                };
+
+                let core_pipe = execute_vertex_shader(&shader, core_pipe, &mut vertex_pipe);
+
+
+                let fragment_pipe = FragmentPipe {
+                    material: Rc::clone(&material),
                     lights,
-                );
+                    time,
+                };
+                
+                execute_fragment_shader(&shader, buffer, buffer_size, core_pipe, &fragment_pipe);
             }
         }
     }
 }
 
-fn execute_vertex_shader(
-    shader: &Rc<dyn Shader>,
-    vertices: [Vec3; 3], 
-    uv_mappings: [Vec2; 3], 
-    norms: [Vec3; 3],
-    colors: [Option<Vec4>; 3],
-    mvp_matrix: Mat4) -> [VertexPipe; 3] {
+fn execute_vertex_shader(shader: &Rc<dyn Shader>, core_pipe: [CorePipe; 3], vertex_pipe: &mut VertexPipe) -> [CorePipe; 3] {
 
-    
-    let vertex_output = [0, 1, 2].map(|i| {
-
-        let input = VertexPipe {
-            id: i,
-
-            vertex: vertices[i],
-            uv_mapping: uv_mappings[i],
-            norm: norms[i],
-
-            color: colors[i],
-
-            mvp_matrix,
-        };
-
-        shader.vertex_shader(input)
-    });
-
-    vertex_output
+    [0, 1, 2].map(|i| {
+        vertex_pipe.id = i;
+        shader.vertex_shader(core_pipe[i], &vertex_pipe)
+    })
 }
 
-fn execute_fragment_shader(
-    buffer: &mut [u8],
-    buffer_size: Vec2,
-    shader: &Rc<dyn Shader>,
-    vertex_output: [VertexPipe; 3],
-    material: Rc<Material>,
-    lights: &Vec<Rc<Light>>) {
+fn execute_fragment_shader(shader: &Rc<dyn Shader>, buffer: &mut [u8], buffer_size: Vec2, core_pipe: [CorePipe; 3], fragment_pipe: &FragmentPipe,) {
 
-    
-    let vertices = vertex_output.map(|v| v.vertex);
-    let uv_mappings = vertex_output.map(|v| v.uv_mapping);
-    let norms = vertex_output.map(|v| v.norm);
+    let vertices = core_pipe.map(|c| c.vertex);
+    let uv_mappings = core_pipe.map(|c| c.uv_mapping);
+    let norms = core_pipe.map(|c| c.norm);
 
-    let colors = VertexPipe::transform_option_bundle(vertex_output.map(|v| v.color));
+    let colors = CorePipe::transform_option(core_pipe.map(|v| v.color));
 
 
     let vertices_2d = &[
@@ -131,18 +105,15 @@ fn execute_fragment_shader(
                 let pixel_index = (y * buffer_size.x as usize + x) * 4; 
 
 
-                let input = FragmentPipe {
+                let core_pipe =  CorePipe {
                     vertex: triangles::mul_barycentric(weights, vertices),
                     uv_mapping: triangles::mul_barycentric(weights, uv_mappings),
                     norm: triangles::mul_barycentric(weights, norms),
 
                     color: if let Some(colors) = colors { Some(triangles::mul_barycentric(weights, colors)) } else { None },
-
-                    material: Rc::clone(&material),
-                    lights,
                 };
 
-                let output = shader.fragment_shader(input);
+                let output = shader.fragment_shader(core_pipe, &fragment_pipe);
 
                 buffer[pixel_index + 0] = output.x as u8;
                 buffer[pixel_index + 1] = output.y as u8;

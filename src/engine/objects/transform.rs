@@ -3,7 +3,7 @@ use glam::EulerRot;
 use glam::Mat4;
 
 
-#[derive(Default)]
+#[derive(Default, Clone, Copy)]
 pub struct Transform {
     pub translation: Vec3,
     pub rotation: EulerRot,

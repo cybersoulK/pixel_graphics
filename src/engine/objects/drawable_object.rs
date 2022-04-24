@@ -4,6 +4,7 @@ use super::{Object, Transform};
 use super::super::Model;
 
 
+#[derive(Clone)]
 pub struct DrawableObject {
     pub transform: Transform,
 

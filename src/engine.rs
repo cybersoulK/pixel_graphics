@@ -1,4 +1,5 @@
 use std::{rc::Rc};
+use std::time::Instant;
 
 use winit::{
     event::{Event},
@@ -22,6 +23,8 @@ pub struct Engine {
     lights: Vec<Rc<Light>>,
 
     camera: Rc<Camera>,
+
+    program_start: Instant,
 }
 
 impl Engine {
@@ -34,6 +37,8 @@ impl Engine {
             lights: Vec::new(),
 
             camera: Default::default(),
+
+            program_start: Instant::now(),
         }
     }
 
@@ -105,7 +110,8 @@ pub fn init<T>(mut game_loop: T)
                     buffer_size,
                     &engine.camera,
                     &engine.drawables,
-                    &engine.lights);
+                    &engine.lights,
+                    engine.program_start.elapsed());
                     
                 window.refresh();
             },
