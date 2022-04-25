@@ -14,7 +14,7 @@ pub struct Transform {
 }
 
 impl Transform {
-    fn update_matrix(&mut self) {
+    pub fn update_matrix(&mut self) {
 
         self.old_matrix =  self.matrix.clone();
         

@@ -7,6 +7,7 @@ use super::super::{Light, Material};
 
 #[derive(Clone, Copy)]
 pub struct CorePipe {
+
     pub vertex: Vec3,
     pub uv_mapping: Vec2,
     pub norm: Vec3,
@@ -15,8 +16,7 @@ pub struct CorePipe {
 }
 
 pub struct VertexPipe {
-
-    pub id: usize,
+    
     pub mvp_matrix: Mat4,
     pub time: Duration,
 }

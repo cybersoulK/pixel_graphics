@@ -18,7 +18,6 @@ mod assets;
 pub struct Engine {
     pub assets: Assets,
 
-    objects: Vec<Rc<dyn Object>>,
     drawables: Vec<Rc<DrawableObject>>,
     lights: Vec<Rc<Light>>,
 
@@ -32,7 +31,6 @@ impl Engine {
         Self {
             assets: Assets::new(),
 
-            objects: Vec::new(),
             drawables: Vec::new(),
             lights: Vec::new(),
 
@@ -42,29 +40,42 @@ impl Engine {
         }
     }
 
+    pub fn update(&mut self){
+
+        self.update_component(&self.camera.components, &self.camera.transform);
+
+
+        for obj in self.drawables.iter() {
+            self.update_component(&obj.components, &obj.transform);
+        }
+
+        for obj in self.lights.iter() {
+            self.update_component(&obj.components, &obj.transform);
+        }
+    }
+
+    pub fn update_component(&self, component_vec: &ComponentVec, transform: &Transform) {
+
+        for c in component_vec.iter() {
+            c.borrow_mut().update(transform, self);
+        }
+    }
+
+
     pub fn set_camera(&mut self, transform: Transform, near: f32, far: f32, fov: f32) {
 
         let camera = Rc::new(Camera::new(transform, near, far, fov));
-        let camera_dyn: Rc<dyn Object> = Rc::<Camera>::clone(&camera);
 
         self.camera = Rc::clone(&camera);
-        self.objects.push(Rc::clone(&camera_dyn));
     }
-
-    pub fn add_object(&mut self, object: Rc<dyn Object>) {
-
-        self.objects.push(object);
-    } 
 
     pub fn add_drawable(&mut self, drawable: Rc<DrawableObject>) {
 
-        self.objects.push(Rc::<DrawableObject>::clone(&drawable));
         self.drawables.push(Rc::clone(&drawable));
     }
 
     pub fn add_light(&mut self, light: Rc<Light>) {
 
-        self.objects.push(Rc::<Light>::clone(&light));
         self.lights.push(Rc::clone(&light));
     }
 }
@@ -101,6 +112,7 @@ pub fn init<T>(mut game_loop: T)
             Event::MainEventsCleared => {
 
                 game_loop.update(&mut engine);
+                engine.update();
 
 
                 let (buffer, buffer_size) = window.get_buffer();

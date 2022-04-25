@@ -37,14 +37,6 @@ impl Model {
     }
 }
 
-pub trait ToRcIterator {
-
-    type Item;
-    type IntoIter;
-
-    fn into_iter(&self) -> Self::IntoIter;
-}
-
 
 pub struct ModelIterator {
     model: Rc<Model>,

@@ -7,6 +7,9 @@ mod triangle;
 mod cube;
 mod shader1;
 
+mod camera_movement;
+mod test_component;
+
 pub struct Game {}
 
 
@@ -55,7 +58,10 @@ impl GameLoop for Game {
         let trig_material = Material::new([trig_texture].to_vec(), trig_shader);
 
         let trig_model = Model::new([trig_mesh].to_vec(), [trig_material].to_vec());
-        let trig = DrawableObject::new(trig_transform, trig_model);
+        let mut trig = DrawableObject::new(trig_transform, trig_model);
+
+        let mut trig_component = test_component::TestComponent {};
+        trig.components.add(trig_component);
 
         engine.add_drawable(Rc::new(trig.clone()));
     }

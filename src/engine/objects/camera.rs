@@ -1,12 +1,13 @@
-use std::f32::consts::PI;
+use std::{f32::consts::PI};
 
 use glam::{Mat4};
 
-use super::{Object, Transform};
+use super::{Transform, ComponentVec};
 
 
 pub struct Camera {
-    transform: Transform,
+    pub transform: Transform,
+    pub components: ComponentVec,
 
     near: f32,
     far: f32,
@@ -15,7 +16,14 @@ pub struct Camera {
 
 impl Camera {
     pub fn new(transform: Transform, near: f32, far: f32, fov: f32) -> Self {
-        Self { transform, near, far, fov }
+        Self {
+            transform,
+            components: ComponentVec::new(),
+            
+            near,
+            far,
+            fov
+        }
     }
 
     pub fn get_vp_matrix(&self) -> Mat4 {
@@ -49,6 +57,7 @@ impl Default for Camera {
     fn default() -> Self {
         Self {
             transform: Transform::default(),
+            components: ComponentVec::new(),
 
             near: 0.1,
             far: 10000.0,
@@ -57,5 +66,3 @@ impl Default for Camera {
     }
 }
 
-impl Object for Camera {
-}

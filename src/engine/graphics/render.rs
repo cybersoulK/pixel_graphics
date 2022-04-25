@@ -1,8 +1,7 @@
 use std::{rc::Rc, time::Duration};
 
-use glam::{Vec2, Vec3, Vec4, Mat4, Vec3Swizzles};
+use glam::{Vec2, Vec3Swizzles};
 
-use crate::Material;
 
 use super::super::{
     {Shader, VertexPipe, FragmentPipe, CorePipe},
@@ -13,14 +12,7 @@ use super::triangles;
 
 
 
-pub fn render_update(
-    buffer: &mut [u8],
-    buffer_size: Vec2,
-    camera: &Rc<Camera>,
-    drawables: &Vec<Rc<DrawableObject>>,
-    lights: &Vec<Rc<Light>>,
-    time: Duration,
-    ) {
+pub fn render_update(buffer: &mut [u8], buffer_size: Vec2, camera: &Rc<Camera>, drawables: &Vec<Rc<DrawableObject>>, lights: &Vec<Rc<Light>>, time: Duration) {
 
 
     buffer.fill(0);
@@ -47,7 +39,6 @@ pub fn render_update(
                 let core_pipe = CorePipe::new_bundle(vertices, uv_mappings, norms, colors); 
 
                 let mut vertex_pipe = VertexPipe {
-                    id: 0,
                     mvp_matrix,
                     time,
                 };
@@ -70,8 +61,7 @@ pub fn render_update(
 fn execute_vertex_shader(shader: &Rc<dyn Shader>, core_pipe: [CorePipe; 3], vertex_pipe: &mut VertexPipe) -> [CorePipe; 3] {
 
     [0, 1, 2].map(|i| {
-        vertex_pipe.id = i;
-        shader.vertex_shader(core_pipe[i], &vertex_pipe)
+        shader.vertex_shader(i, core_pipe[i], &vertex_pipe)
     })
 }
 
