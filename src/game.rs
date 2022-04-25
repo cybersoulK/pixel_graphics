@@ -20,19 +20,26 @@ impl GameLoop for Game {
 
     fn init(&mut self, engine: &mut Engine){
 
+        
         let mut camera_transform = Transform::default();
-        camera_transform.translation.z = -10.0;
-        camera_transform.translation.y = -200.0;
-        camera_transform.translation.x = -200.0;
-        engine.set_camera(camera_transform, 0.01, (90.0 / 90.0) * (PI / 2.0));
+        camera_transform.translation.z = -1.5;
+        camera_transform.translation.y = 0.0;
+        camera_transform.translation.x = 0.0;
 
+        let mut camera = Camera::new(camera_transform, 0.01, (70.0 / 90.0) * (PI / 2.0));
+        
+
+        let mut camera_movement = camera_movement::CameraMovement {};
+        camera.components.add(camera_movement);
+
+        engine.set_camera(camera);
 
         
         let cube_mesh = cube::get_cube();
         let cube_transform = Transform { 
             translation: glam::vec3(0.0, 0.0, 0.0), 
             scale: glam::vec3(0.3, 0.2, 0.1), 
-            rotation: glam::vec3(1.0, 2.0, 3.0),
+            rotation: glam::vec3(0.0, 0.0, 0.0),
             ..Default::default() 
         };
 

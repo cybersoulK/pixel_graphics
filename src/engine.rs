@@ -1,5 +1,4 @@
-use std::{rc::Rc};
-use std::time::Instant;
+use std::time::{Instant, Duration};
 
 use winit::{
     event::{Event},
@@ -23,7 +22,9 @@ pub struct Engine {
 
     camera: Camera,
 
-    program_start: Instant,
+    time_program_start: Instant,
+    time_now: Instant,
+    deltatime: Duration,
 }
 
 impl Engine {
@@ -36,44 +37,67 @@ impl Engine {
 
             camera: Default::default(),
 
-            program_start: Instant::now(),
+            time_program_start: Instant::now(),
+            time_now: Instant::now(),
+            deltatime: Duration::from_secs_f32(0.01),
         }
     }
 
     pub fn update(&mut self){
 
-        self.camera.transform.update_matrix();
+        self.update_deltatime();
+        self.update_components();
+    }
+
+    fn update_deltatime(&mut self) {
+
+        let time_now = Instant::now();
+
+        self.deltatime = time_now - self.time_now;
+        self.time_now = time_now;
+    }
+
+    fn update_components(&mut self) {
+
+        let iter = self.camera.components.iter();
+
+        for obj in self.drawables.iter_mut() {
+            iter.chain(obj.components.iter());
+        }
+        for obj in self.lights.iter_mut() {
+            iter.chain(obj.components.iter());
+        }
+
+
+
         for c in self.camera.components.iter() {
             self.camera.transform = c.borrow_mut().update(self.camera.transform);
         }
+        for c in obj.components.iter() {
+            obj.transform = c.borrow_mut().update(obj.transform);
+        }
+        for c in obj.components.iter() {
+            obj.transform = c.borrow_mut().update(obj.transform);
+        }
 
+
+
+        self.camera.transform.update_matrix();
 
         for obj in self.drawables.iter_mut() {
             obj.transform.update_matrix();
         }
-
-        for obj in self.drawables.iter_mut() {
-            for c in obj.components.iter() {
-                obj.transform = c.borrow_mut().update(obj.transform);
-            }
-        }
-
-
         for obj in self.lights.iter_mut() {
             obj.transform.update_matrix();
         }
 
-        for obj in self.lights.iter_mut() {
-            for c in obj.components.iter() {
-                obj.transform = c.borrow_mut().update(obj.transform);
-            }
-        }
+        
     }
 
 
-    pub fn set_camera(&mut self, transform: Transform, near: f32, fov_y_radians: f32) {
+    pub fn set_camera(&mut self, camera: Camera) {
 
-        self.camera = Camera::new(transform, near, fov_y_radians);
+        self.camera = camera;
     }
 
     pub fn add_drawable(&mut self, drawable: DrawableObject) {
@@ -90,9 +114,6 @@ impl Engine {
 pub trait GameLoop {
     fn init(&mut self, engine: &mut Engine);
     fn update(&mut self, engine: &mut Engine);
-
-    //fn on_key_down(keycode) {}
-    //fn on_key_up(keycode) {}
 }
 
 
@@ -131,7 +152,7 @@ pub fn init<T>(mut game_loop: T)
                     &engine.camera,
                     &engine.drawables,
                     &engine.lights,
-                    engine.program_start.elapsed());
+                    engine.time_program_start.elapsed());
                     
                 window.refresh();
             },

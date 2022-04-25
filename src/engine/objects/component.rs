@@ -5,12 +5,12 @@ use super::{Transform, super::Engine};
 
 pub trait Component {
     //fn init(&mut self, _transform: Transform) -> Transform; // _engine: &Engine
-    fn update(&mut self, _transform: Transform) -> Transform; // _engine: &Engine
+    fn update(&mut self, _transform: Transform, _engine: &Engine) -> Transform; 
 }
 
 #[derive(Clone)]
 pub struct ComponentVec {
-    vec: Vec<Rc<RefCell<dyn Component>>>
+    vec: Vec<Rc<dyn Component>>
 }
 
 impl ComponentVec {
@@ -22,11 +22,11 @@ impl ComponentVec {
 
     pub fn add<C: Component + 'static>(&mut self, component: C){
 
-        let d = Rc::new(RefCell::new(component));
+        let d = Rc::new(component);
         self.vec.push(d);
     }
 
-    pub fn iter(&self) -> Iter<Rc<RefCell<dyn Component>>> {
+    pub fn iter(&self) -> Iter<Rc<dyn Component>> {
         self.vec.iter()
     }
 }
