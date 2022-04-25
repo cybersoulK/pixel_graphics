@@ -78,7 +78,7 @@ fn execute_fragment_shader(shader: &Rc<dyn Shader>, core_pipe: [CorePipe; 3], vp
  
 
     let vertices_2d_3 = vertices.map(|vertex| {
-        vp_matrix.project_point3(vertex)
+        vp_matrix.inverse().transform_point3(vertex)
     });
 
     let vertices_2d = &vertices_2d_3.map(|vertex| {

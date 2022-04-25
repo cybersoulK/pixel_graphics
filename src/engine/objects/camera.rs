@@ -37,7 +37,7 @@ impl Camera {
         let aspect_ratio = buffer_size.y / buffer_size.x;
 
         Mat4::default()
-            .mul_mat4(&self.get_view_matrix().inverse())
+            .mul_mat4(&self.get_view_matrix())
             .mul_mat4(&self.get_projection_matrix(aspect_ratio))
     }
 

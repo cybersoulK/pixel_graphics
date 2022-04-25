@@ -21,17 +21,17 @@ impl GameLoop for Game {
     fn init(&mut self, engine: &mut Engine){
 
         let mut camera_transform = Transform::default();
-        camera_transform.translation.z = -1000.0;
-        camera_transform.translation.y = 0.0;
-        camera_transform.translation.x = 0.0;
-        engine.set_camera(camera_transform, 0.01, (45.0 / 90.0) * (PI / 2.0));
+        camera_transform.translation.z = -10.0;
+        camera_transform.translation.y = -200.0;
+        camera_transform.translation.x = -200.0;
+        engine.set_camera(camera_transform, 0.01, (90.0 / 90.0) * (PI / 2.0));
 
 
         
         let cube_mesh = cube::get_cube();
         let cube_transform = Transform { 
             translation: glam::vec3(0.0, 0.0, 0.0), 
-            scale: glam::vec3(3.3, 2.2, 1.1), 
+            scale: glam::vec3(0.3, 0.2, 0.1), 
             rotation: glam::vec3(1.0, 2.0, 3.0),
             ..Default::default() 
         };
