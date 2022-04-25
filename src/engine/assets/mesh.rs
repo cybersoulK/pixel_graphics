@@ -59,9 +59,9 @@ impl MeshIterator {
 }
 
 impl Iterator for MeshIterator {
-    type Item = ([Vec3; 3], [Vec2; 3], [Vec3; 3]);
+    type Item = ([Vec3; 3], [Vec2; 3], [Vec3; 3], usize);
     
-    fn next(&mut self) -> Option<([Vec3; 3], [Vec2; 3], [Vec3; 3])> {
+    fn next(&mut self) -> Option<([Vec3; 3], [Vec2; 3], [Vec3; 3], usize)> {
 
         if self.index >= self.mesh.indexes.len() { return None; }
 
@@ -70,17 +70,17 @@ impl Iterator for MeshIterator {
         let mut uv_mappings: [Vec2; 3] = Default::default();
         let mut norms:[Vec3; 3] = Default::default();
         
-        for i in self.index..self.index+3 {
+        for i in 0..3 {
 
-            let mesh_index = self.mesh.indexes[self.index];
+            let mesh_index = self.mesh.indexes[self.index + i];
 
             vertices[i] = self.mesh.vertices[mesh_index[0]];
             uv_mappings[i] = self.mesh.uv_mappings[mesh_index[1]];
             norms[i] = self.mesh.norms[mesh_index[2]];
-
-            self.index += 1;
         }
 
-        Some((vertices, uv_mappings, norms))
+        self.index += 3;
+
+        Some((vertices, uv_mappings, norms, self.index / 3 - 1))
     }
 }

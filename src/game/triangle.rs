@@ -8,9 +8,9 @@ use super::Mesh;
 pub fn get_triangle() -> Rc<Mesh> {
 
     let vertices = [
-            Vec3::new(200.0,200.0,0.0),
-            Vec3::new(200.0,500.0,0.0),  
-            Vec3::new(500.0,500.0,0.0),
+            Vec3::new(0.0,0.0,0.0),
+            Vec3::new(0.0,1.0,0.0),  
+            Vec3::new(1.0,1.0,0.0),
         ];
         
     let uv_mappings = [

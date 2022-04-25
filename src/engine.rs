@@ -18,10 +18,10 @@ mod assets;
 pub struct Engine {
     pub assets: Assets,
 
-    drawables: Vec<Rc<DrawableObject>>,
-    lights: Vec<Rc<Light>>,
+    drawables: Vec<DrawableObject>,
+    lights: Vec<Light>,
 
-    camera: Rc<Camera>,
+    camera: Camera,
 
     program_start: Instant,
 }
@@ -42,41 +42,48 @@ impl Engine {
 
     pub fn update(&mut self){
 
-        self.update_component(&self.camera.components, &self.camera.transform);
-
-
-        for obj in self.drawables.iter() {
-            self.update_component(&obj.components, &obj.transform);
+        self.camera.transform.update_matrix();
+        for c in self.camera.components.iter() {
+            self.camera.transform = c.borrow_mut().update(self.camera.transform);
         }
 
-        for obj in self.lights.iter() {
-            self.update_component(&obj.components, &obj.transform);
+
+        for obj in self.drawables.iter_mut() {
+            obj.transform.update_matrix();
+        }
+
+        for obj in self.drawables.iter_mut() {
+            for c in obj.components.iter() {
+                obj.transform = c.borrow_mut().update(obj.transform);
+            }
+        }
+
+
+        for obj in self.lights.iter_mut() {
+            obj.transform.update_matrix();
+        }
+
+        for obj in self.lights.iter_mut() {
+            for c in obj.components.iter() {
+                obj.transform = c.borrow_mut().update(obj.transform);
+            }
         }
     }
 
-    pub fn update_component(&self, component_vec: &ComponentVec, transform: &Transform) {
 
-        for c in component_vec.iter() {
-            c.borrow_mut().update(transform, self);
-        }
+    pub fn set_camera(&mut self, transform: Transform, near: f32, fov_y_radians: f32) {
+
+        self.camera = Camera::new(transform, near, fov_y_radians);
     }
 
+    pub fn add_drawable(&mut self, drawable: DrawableObject) {
 
-    pub fn set_camera(&mut self, transform: Transform, near: f32, far: f32, fov: f32) {
-
-        let camera = Rc::new(Camera::new(transform, near, far, fov));
-
-        self.camera = Rc::clone(&camera);
+        self.drawables.push(drawable);
     }
 
-    pub fn add_drawable(&mut self, drawable: Rc<DrawableObject>) {
+    pub fn add_light(&mut self, light: Light) {
 
-        self.drawables.push(Rc::clone(&drawable));
-    }
-
-    pub fn add_light(&mut self, light: Rc<Light>) {
-
-        self.lights.push(Rc::clone(&light));
+        self.lights.push(light);
     }
 }
 
@@ -115,10 +122,11 @@ pub fn init<T>(mut game_loop: T)
                 engine.update();
 
 
-                let (buffer, buffer_size) = window.get_buffer();
+                let (buffer, z_buffer, buffer_size) = window.get_buffer();
 
                 graphics::render_update(
                     buffer,
+                    z_buffer,
                     buffer_size,
                     &engine.camera,
                     &engine.drawables,

@@ -7,7 +7,7 @@ pub struct CameraMovement {
 
 impl Component for CameraMovement {
 
-    fn update(&mut self, transform: &Transform, engine: &Engine) {
-        
+    fn update(&mut self, transform: Transform) -> Transform {
+        transform
     }
 }

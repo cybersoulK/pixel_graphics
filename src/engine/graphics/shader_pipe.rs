@@ -17,14 +17,13 @@ pub struct CorePipe {
 
 pub struct VertexPipe {
     
-    pub mvp_matrix: Mat4,
     pub time: Duration,
 }
 
 pub struct FragmentPipe<'a> {
 
     pub material: Rc<Material>,
-    pub lights: &'a Vec<Rc<Light>>,
+    pub lights: &'a Vec<Light>,
     pub time: Duration,
 }
 

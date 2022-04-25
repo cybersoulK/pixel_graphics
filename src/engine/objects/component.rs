@@ -4,8 +4,8 @@ use super::{Transform, super::Engine};
 
 
 pub trait Component {
-    fn init(&mut self, _transform: &Transform, _engine: &Engine) {}
-    fn update(&mut self, _transform: &Transform, _engine: &Engine) {}
+    //fn init(&mut self, _transform: Transform) -> Transform; // _engine: &Engine
+    fn update(&mut self, _transform: Transform) -> Transform; // _engine: &Engine
 }
 
 #[derive(Clone)]
