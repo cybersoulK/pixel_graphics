@@ -4,7 +4,6 @@ mod game;
 
 fn main() {
 
-    let game = Game {};
-
+    let game = Game::new();
     pixel_graphics::init(game);
 }

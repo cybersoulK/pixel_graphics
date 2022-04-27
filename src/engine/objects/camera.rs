@@ -2,12 +2,12 @@ use std::{f32::consts::PI};
 
 use glam::{Vec2, Mat4};
 
-use super::{Transform, ComponentVec};
+use super::{Object, Transform, ComponentVec};
 
 
 pub struct Camera {
-    pub transform: Transform,
-    pub components: ComponentVec,
+    transform: Transform,
+    components: ComponentVec,
 
     near: f32,
     far: f32,
@@ -16,7 +16,7 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new(transform: Transform, near: f32, fov: f32) -> Self {
+    pub fn new(transform: Transform, near: f32, fov: f32, ) -> Self {
         Self {
             transform,
             components: ComponentVec::new(),
@@ -32,28 +32,13 @@ impl Camera {
         self.near
     }
 
-    pub fn get_vp_matrix(&self, buffer_size: Vec2) -> Mat4 {
-
-        let aspect_ratio = buffer_size.y / buffer_size.x;
-
-        Mat4::default()
-            .mul_mat4(&self.get_view_matrix().inverse())
-            .mul_mat4(&self.get_projection_matrix(aspect_ratio))
-    }
-
+    
     pub fn get_view_matrix(&self) -> Mat4 {
-
         self.transform.matrix
     }
 
+    //aspect ratio is x / y
     pub fn get_projection_matrix(&self, aspect_ratio: f32) -> Mat4 {
-
-        /*Mat4::from_cols_array_2d(&[
-            [1.0 / (aspect_ratio * (self.fov/2.0).tan()), 0.0, 0.0, 0.0],
-            [0.0, 1.0 / ((self.fov/2.0).tan()), 0.0, 0.0],
-            [0.0, 0.0, - (self.near+self.far) / (self.near-self.far), - (2.0*self.near*self.far) / (self.near-self.far)],
-            [0.0, 0.0, -1.0, 0.0]
-            ])*/
 
         Mat4::perspective_lh(self.fov, aspect_ratio, self.near, self.far)
     }
@@ -73,3 +58,17 @@ impl Default for Camera {
     }
 }
 
+
+impl Object for Camera {
+    fn transform(&mut self) -> &mut Transform {
+        &mut self.transform
+    }
+
+    fn components(&mut self) -> &mut ComponentVec {
+        &mut self.components
+    }
+
+    fn get_update_bundle(&mut self) -> (&mut Transform, &ComponentVec) {
+        (&mut self.transform, &self.components)
+    }
+}

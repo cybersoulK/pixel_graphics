@@ -20,7 +20,7 @@ impl Shader2 {
 
 impl Shader for Shader2 {
 
-    fn vertex_shader(&self, mut core: CorePipe, params: &VertexPipe, vertex_id: usize, face_id: usize) -> CorePipe {
+    fn vertex_shader(&self, mut core: CorePipe, params: &VertexPipe, face_id: usize, vertex_id: usize) -> CorePipe {
         
         core.color = match face_id {
             0 | 1 => Some(Vec4::new(180.0, 0.0, 0.0, 255.0)),

@@ -1,15 +1,22 @@
-use super::{Component, Transform, Engine};
+use std::any::Any;
+
+use super::{Component, ComponentPipe, Transform};
 
 
 pub struct TestComponent {
 
 }
 
+impl TestComponent {
+}
+
 impl Component for TestComponent {
 
-    fn update(&mut self, _transform: Transform, _engine: &Engine) -> Transform {
-        
+    fn update(&mut self, transform: &mut Transform, _params: &ComponentPipe) {
         transform.scale /= 1.001;
-        transform
+    }
+
+    fn as_any(&mut self) -> &mut dyn Any {
+        self
     }
 }

@@ -1,6 +1,6 @@
-use glam::Vec3;
-use glam::EulerRot;
-use glam::Mat4;
+use glam::{Vec3, Mat4};
+
+use super::world_orientation::get_quat;
 
 
 #[derive(Clone, Copy)]
@@ -20,7 +20,7 @@ impl Transform {
         
         self.matrix = Mat4::from_scale_rotation_translation(
             self.scale, 
-            glam::Quat::from_euler(EulerRot::XYZ, self.rotation.x, self.rotation.y, self.rotation.z), 
+            get_quat(self.rotation),
             self.translation);
     }
 }

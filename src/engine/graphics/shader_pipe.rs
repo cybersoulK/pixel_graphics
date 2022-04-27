@@ -1,6 +1,6 @@
 use std::{rc::Rc, time::Duration};
 
-use glam::{Vec2, Vec3, Vec4, Mat4};
+use glam::{Vec2, Vec3, Vec4};
 
 use super::super::{Light, Material};
 
@@ -17,14 +17,14 @@ pub struct CorePipe {
 
 pub struct VertexPipe {
     
-    pub time: Duration,
+    pub elapsed_time: Duration,
 }
 
 pub struct FragmentPipe<'a> {
 
     pub material: Rc<Material>,
     pub lights: &'a Vec<Light>,
-    pub time: Duration,
+    pub elapsed_time: Duration,
 }
 
 

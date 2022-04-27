@@ -1,17 +1,17 @@
-use std::time::{Instant, Duration};
+use std::{time::{Instant, Duration}};
 
-use winit::{
-    event::{Event},
-    event_loop::{ControlFlow, EventLoop},
-};
-
+pub use events::*;
 pub use graphics::*;
+pub use inputs::*;
 pub use assets::*;
 pub use objects::*;
 
+mod events;
 mod graphics;
+mod inputs;
 mod objects;
 mod assets;
+
 
 
 pub struct Engine {
@@ -19,12 +19,10 @@ pub struct Engine {
 
     drawables: Vec<DrawableObject>,
     lights: Vec<Light>,
-
     camera: Camera,
 
-    time_program_start: Instant,
-    time_now: Instant,
-    deltatime: Duration,
+    timer: EngineTimer,
+    inputs: InputsManager,
 }
 
 impl Engine {
@@ -34,66 +32,46 @@ impl Engine {
 
             drawables: Vec::new(),
             lights: Vec::new(),
-
             camera: Default::default(),
 
-            time_program_start: Instant::now(),
-            time_now: Instant::now(),
-            deltatime: Duration::from_secs_f32(0.01),
+            timer: EngineTimer::new(),
+            inputs: InputsManager::new(),
         }
     }
 
     pub fn update(&mut self){
 
-        self.update_deltatime();
-        self.update_components();
-    }
-
-    fn update_deltatime(&mut self) {
-
-        let time_now = Instant::now();
-
-        self.deltatime = time_now - self.time_now;
-        self.time_now = time_now;
-    }
-
-    fn update_components(&mut self) {
-
-        let iter = self.camera.components.iter();
-
-        for obj in self.drawables.iter_mut() {
-            iter.chain(obj.components.iter());
-        }
-        for obj in self.lights.iter_mut() {
-            iter.chain(obj.components.iter());
-        }
+        self.timer.update();
 
 
+        let update_pipe = ComponentPipe {
+            timer: self.timer,
+            inputs: self.inputs.clone(),
+        };
 
-        for c in self.camera.components.iter() {
-            self.camera.transform = c.borrow_mut().update(self.camera.transform);
-        }
-        for c in obj.components.iter() {
-            obj.transform = c.borrow_mut().update(obj.transform);
-        }
-        for c in obj.components.iter() {
-            obj.transform = c.borrow_mut().update(obj.transform);
-        }
-
-
-
-        self.camera.transform.update_matrix();
-
-        for obj in self.drawables.iter_mut() {
-            obj.transform.update_matrix();
-        }
-        for obj in self.lights.iter_mut() {
-            obj.transform.update_matrix();
-        }
-
+        Self::update_object(&mut self.camera, &update_pipe);
         
+        for obj in self.drawables.iter_mut() {
+            Self::update_object(obj, &update_pipe); }
+
+        for obj in self.lights.iter_mut() {
+            Self::update_object(obj, &update_pipe); }
     }
 
+    fn update_object<O : Object>(obj: &mut O, pipe: &ComponentPipe){
+
+        let (transform, components) = obj.get_update_bundle();
+ 
+        for c in components.iter() {
+            c.borrow_mut().update(transform, &pipe);
+        }
+        transform.update_matrix();
+    }
+
+
+    pub fn set_inputs(&mut self, inputs: InputsManager) {
+        self.inputs = inputs;
+    }
 
     pub fn set_camera(&mut self, camera: Camera) {
 
@@ -111,54 +89,36 @@ impl Engine {
     }
 }
 
-pub trait GameLoop {
-    fn init(&mut self, engine: &mut Engine);
-    fn update(&mut self, engine: &mut Engine);
+
+
+#[derive(Clone, Copy)]
+pub struct EngineTimer {
+    time_program_start: Instant,
+    time_now: Instant,
+    
+    pub delta_time: Duration,
+    pub elapsed_time: Duration,
 }
 
+impl EngineTimer {
+    fn new() -> Self {
+        Self {
+            time_program_start: Instant::now(),
+            time_now: Instant::now(),
 
-pub fn init<T>(mut game_loop: T)
-    where T: GameLoop + 'static {
-
-    let event_loop = EventLoop::new();
-
-    let mut engine = Engine::new();
-    let mut window = WindowPixel::new(&event_loop);
-
-
-    game_loop.init(&mut engine);
-
-
-    event_loop.run(move |event, _, control_flow| {
-
-        *control_flow = ControlFlow::Poll;
-        
-
-        match event {
-            Event::WindowEvent { event, .. } => window.window_event(event, control_flow),
-
-            Event::MainEventsCleared => {
-
-                game_loop.update(&mut engine);
-                engine.update();
-
-
-                let (buffer, z_buffer, buffer_size) = window.get_buffer();
-
-                graphics::render_update(
-                    buffer,
-                    z_buffer,
-                    buffer_size,
-                    &engine.camera,
-                    &engine.drawables,
-                    &engine.lights,
-                    engine.time_program_start.elapsed());
-                    
-                window.refresh();
-            },
-            _ => ()
+            delta_time: Duration::from_secs_f32(0.01),
+            elapsed_time: Duration::new(0, 0),
         }
+    }
 
+    fn update(&mut self) {
 
-    });
+        let time_now = Instant::now();
+
+        self.delta_time = time_now - self.time_now;
+        self.time_now = time_now;
+
+        self.elapsed_time = self.time_now - self.time_program_start;
+    }
+
 }

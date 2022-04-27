@@ -1,19 +1,19 @@
 use winit::dpi::{LogicalSize, PhysicalSize};
 use winit::window::{WindowBuilder, Window};
 
-use winit::{
-    event::{WindowEvent},
-    event_loop::{ControlFlow, EventLoop},
-};
+use winit::event_loop::{ControlFlow, EventLoop};
 
 use pixels::{SurfaceTexture, PixelsBuilder};
 use pixels::wgpu::{PowerPreference, RequestAdapterOptions, Color};
 
 use glam::Vec2;
 
+use super::super::Engine;
+use super::render_update;
+
 
 pub struct WindowPixel {
-    window: Window,
+    pub window: Window,
     context: pixels::Pixels,
 
     z_buffer: Vec<f32>,
@@ -60,7 +60,28 @@ impl WindowPixel {
         renderer
     }
 
-    fn resize(&mut self, new_size: PhysicalSize<u32>) {
+    pub fn render(&mut self, engine: &Engine) {
+
+        let buffer = self.context.get_frame();  
+        let z_buffer = self.z_buffer.as_mut_slice(); 
+        
+        let buffer_size = Vec2::new(self.buffer_size.width as f32, self.buffer_size.height as f32);
+
+        render_update(
+            buffer,
+            z_buffer,
+            buffer_size,
+            &engine.camera,
+            &engine.drawables,
+            &engine.lights,
+            engine.timer.elapsed_time);
+                    
+            self.context.render().unwrap();
+            self.window.request_redraw();
+    }
+    
+    
+    pub fn resize(&mut self, new_size: PhysicalSize<u32>) {
 
         self.context.resize_surface(new_size.width, new_size.height);
 
@@ -77,37 +98,5 @@ impl WindowPixel {
 
         self.buffer_size = LogicalSize::new(new_buffer_width, new_buffer_height);
         //BUG(from pixels.rs): buffer only scales by 1x 2x 4x according to the surface area.
-    }
-
-    pub fn window_event(&mut self, event: WindowEvent, control_flow: &mut ControlFlow) {
-
-        match event {
-    
-            WindowEvent::CloseRequested => {
-                println!("The close button was pressed; stopping");
-                *control_flow = ControlFlow::Exit
-            },
-            WindowEvent::Resized(new_size) => {
-                self.resize(new_size);
-            },
-            WindowEvent::ScaleFactorChanged  { new_inner_size, ..} => {
-                self.resize(*new_inner_size);
-            },
-            _ => ()
-        }
-    }
-
-
-    pub fn get_buffer(&mut self) -> (&mut [u8], &mut [f32], Vec2) {
-
-        (self.context.get_frame(),
-        self.z_buffer.as_mut_slice(),
-        Vec2::new(self.buffer_size.width as f32, self.buffer_size.height as f32)
-    )
-    }
-
-    pub fn refresh(&mut self) {
-        self.context.render().unwrap();
-        self.window.request_redraw();
     }
 }

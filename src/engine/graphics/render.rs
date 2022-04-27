@@ -12,14 +12,11 @@ use super::triangles;
 
 
 
-pub fn render_update(buffer: &mut [u8], z_buffer: &mut [f32], buffer_size: Vec2, camera: &Camera, drawables: &Vec<DrawableObject>, lights: &Vec<Light>, time: Duration) {
-
+pub fn render_update(buffer: &mut [u8], z_buffer: &mut [f32], buffer_size: Vec2, camera: &Camera, drawables: &Vec<DrawableObject>, lights: &Vec<Light>, elapsed_time: Duration) {
 
     buffer.fill(0);
     z_buffer.fill(f32::MAX);
 
-
-    let vp_matrix = camera.get_vp_matrix(buffer_size);
 
     for obj in drawables {
 
@@ -40,7 +37,7 @@ pub fn render_update(buffer: &mut [u8], z_buffer: &mut [f32], buffer_size: Vec2,
                 let core_pipe = CorePipe::new_bundle(vertices, uv_mappings, norms, colors); 
 
                 let mut vertex_pipe = VertexPipe {
-                    time,
+                    elapsed_time,
                 };
 
                 let core_pipe = execute_vertex_shader(&shader, core_pipe, &mut vertex_pipe, model_matrix, face_id);
@@ -49,7 +46,7 @@ pub fn render_update(buffer: &mut [u8], z_buffer: &mut [f32], buffer_size: Vec2,
                 let fragment_pipe = FragmentPipe {
                     material: Rc::clone(&material),
                     lights,
-                    time,
+                    elapsed_time,
                 };
                 
                 execute_fragment_shader(&shader, core_pipe, &fragment_pipe,  camera, buffer, z_buffer, buffer_size);
@@ -61,9 +58,11 @@ pub fn render_update(buffer: &mut [u8], z_buffer: &mut [f32], buffer_size: Vec2,
 fn execute_vertex_shader(shader: &Rc<dyn Shader>, core_pipe: [CorePipe; 3], vertex_pipe: &mut VertexPipe, model_matrix: Mat4, face_id: usize) -> [CorePipe; 3] {
 
     [0, 1, 2].map(|vertex_id| {
-        let mut core_pipe = shader.vertex_shader(core_pipe[vertex_id], &vertex_pipe, vertex_id, face_id);
+        let mut core_pipe = shader.vertex_shader(core_pipe[vertex_id], &vertex_pipe, face_id, vertex_id);
 
-        core_pipe.vertex = model_matrix.project_point3(core_pipe.vertex);
+        core_pipe.vertex = model_matrix.transform_point3(core_pipe.vertex);
+        core_pipe.norm = model_matrix.transform_vector3(core_pipe.norm);
+
         core_pipe
     })
 }
@@ -77,11 +76,11 @@ fn execute_fragment_shader(shader: &Rc<dyn Shader>, core_pipe: [CorePipe; 3], fr
     let colors = CorePipe::transform_option(core_pipe.map(|v| v.color));
  
 
-    let mut vertices_2d_3 = vertices.map(|vertex| {
+    let vertices_2d_3 = vertices.map(|vertex| {
         let transformed_vertex = camera.get_view_matrix().inverse().transform_point3(vertex);
         let depth = transformed_vertex.z;
 
-        let projected_vertex = camera.get_projection_matrix(buffer_size.y / buffer_size.x).project_point3(transformed_vertex);
+        let projected_vertex = camera.get_projection_matrix(buffer_size.x / buffer_size.y).project_point3(transformed_vertex);
         
         let canvas_vertex = Vec3::new(
             (0.5 + projected_vertex.x) * buffer_size.x,
@@ -95,7 +94,6 @@ fn execute_fragment_shader(shader: &Rc<dyn Shader>, core_pipe: [CorePipe; 3], fr
     let vertices_2d = &vertices_2d_3.map(|vertex| {
         vertex.xy()
     });
-
 
     let ((min_x, min_y), (max_x, max_y)) = triangles::clip_triangle(vertices_2d, buffer_size);
     
