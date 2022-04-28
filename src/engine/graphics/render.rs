@@ -1,6 +1,6 @@
 use std::{rc::Rc, time::Duration};
 
-use glam::{Vec2, Mat4, Vec3Swizzles, Vec3};
+use glam::{Vec2, Mat4, Vec3, Vec4, Vec3Swizzles};
 
 
 use super::super::{
@@ -31,8 +31,7 @@ pub fn render_update(buffer: &mut [u8], z_buffer: &mut [f32], buffer_size: Vec2,
             
             for (vertices, uv_mappings, norms, face_id) in MeshIterator::new(&mesh) {
                 
-                let colors = [None; 3];
-
+                let colors = [Vec4::new(1.0, 1.0, 1.0, 1.0); 3];
 
                 let core_pipe = CorePipe::new_bundle(vertices, uv_mappings, norms, colors); 
 
@@ -69,62 +68,53 @@ fn execute_vertex_shader(shader: &Rc<dyn Shader>, core_pipe: [CorePipe; 3], vert
 
 fn execute_fragment_shader(shader: &Rc<dyn Shader>, core_pipe: [CorePipe; 3], fragment_pipe: &FragmentPipe, camera: &Camera, buffer: &mut [u8], z_buffer: &mut [f32], buffer_size: Vec2) {
 
-    let vertices = core_pipe.map(|c| c.vertex);
-    let uv_mappings = core_pipe.map(|c| c.uv_mapping);
-    let norms = core_pipe.map(|c| c.norm);
+    let vertices_2d_3 = core_pipe.map(|c| {
 
-    let colors = CorePipe::transform_option(core_pipe.map(|v| v.color));
- 
+        let transformed_vertex = camera.get_view_matrix().inverse()
+            .transform_point3(c.vertex);
 
-    let vertices_2d_3 = vertices.map(|vertex| {
-        let transformed_vertex = camera.get_view_matrix().inverse().transform_point3(vertex);
-        let depth = transformed_vertex.z;
+        let signum = transformed_vertex.z.signum();
 
-        let projected_vertex = camera.get_projection_matrix(buffer_size.x / buffer_size.y).project_point3(transformed_vertex);
-        
+        let projected_vertex = camera.get_projection_matrix(buffer_size.x / buffer_size.y)
+            .project_point3(transformed_vertex);
+
+
         let canvas_vertex = Vec3::new(
-            (0.5 + projected_vertex.x) * buffer_size.x,
-            (0.5 - projected_vertex.y) * buffer_size.y,
-            depth,
-        );
-        
+            (0.5 + projected_vertex.x * signum) * buffer_size.x,
+            (0.5 - projected_vertex.y * signum) * buffer_size.y,
+            projected_vertex.z * signum);
+
         canvas_vertex
     });
 
-    let vertices_2d = &vertices_2d_3.map(|vertex| {
+    let vertices_2d = vertices_2d_3.map(|vertex| {
         vertex.xy()
     });
 
+   
     let ((min_x, min_y), (max_x, max_y)) = triangles::clip_triangle(vertices_2d, buffer_size);
     
     for y in min_y..max_y {  
         for x in min_x..max_x {
 
-            let point = &Vec2::new(x as f32 + 0.5, y as f32 + 0.5);
+            let point = Vec2::new(x as f32 + 0.5, y as f32 + 0.5);
             
 
-            if triangles::is_inside_triangle(vertices_2d, point, super::settings::FRONT_FACE) {
+            if triangles::is_inside_triangle(vertices_2d, point, super::settings::FRONT_FACE, true) {
      
-                let weights = &triangles::calc_barycentric(vertices_2d, point);
+                let weights = triangles::calc_barycentric(vertices_2d, point);
 
-                let pixel_index = (y * buffer_size.x as usize + x) * 4; 
-
-
-                let core_pipe =  CorePipe {
-                    vertex: triangles::mul_barycentric(weights, vertices),
-                    uv_mapping: triangles::mul_barycentric(weights, uv_mappings),
-                    norm: triangles::mul_barycentric(weights, norms),
-
-                    color: if let Some(colors) = colors { Some(triangles::mul_barycentric(weights, colors)) } else { None },
-                };
+                let core_pipe = CorePipe::mul_barycentric(core_pipe, weights);
                 let vertex_2d = triangles::mul_barycentric(weights, vertices_2d_3);
 
-                let output = shader.fragment_shader(core_pipe, &fragment_pipe, vertex_2d);
-
-
+                let pixel_index = (y * buffer_size.x as usize + x) * 4; 
                 let depth_index = y * buffer_size.x as usize + x; 
                 
-                if vertex_2d.z < z_buffer[depth_index] && vertex_2d.z >= camera.get_near() {
+                
+                if vertex_2d.z >= camera.get_near() && vertex_2d.z < z_buffer[depth_index] {
+           
+                    let output = shader.fragment_shader(core_pipe, &fragment_pipe, vertex_2d);
+
                     buffer[pixel_index + 0] = output.x as u8;
                     buffer[pixel_index + 1] = output.y as u8;
                     buffer[pixel_index + 2] = output.z as u8;

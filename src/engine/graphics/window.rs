@@ -1,7 +1,7 @@
 use winit::dpi::{LogicalSize, PhysicalSize};
 use winit::window::{WindowBuilder, Window};
 
-use winit::event_loop::{ControlFlow, EventLoop};
+use winit::event_loop::EventLoop;
 
 use pixels::{SurfaceTexture, PixelsBuilder};
 use pixels::wgpu::{PowerPreference, RequestAdapterOptions, Color};

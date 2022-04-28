@@ -2,8 +2,8 @@ use super::{Object, Transform, ComponentVec};
 
 
 pub struct Light {
-    transform: Transform,
-    components: ComponentVec,
+    pub transform: Transform,
+    pub components: ComponentVec,
 }
 
 impl Light {

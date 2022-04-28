@@ -2,15 +2,15 @@ use std::rc::Rc;
 
 use glam::{Vec3, Vec2};
 
-use super::Mesh;
+use pixel_graphics::Mesh;
 
 
-pub fn get_triangle() -> Rc<Mesh> {
+pub fn build() -> Rc<Mesh> {
 
     let vertices = [
-            Vec3::new(0.0,0.0,0.0),
-            Vec3::new(0.0,1.0,0.0),  
-            Vec3::new(1.0,1.0,0.0),
+            Vec3::new(-1.0, -1.0, 1.0),
+            Vec3::new(1.0, -1.0, 1.0),  
+            Vec3::new(1.0, 1.0, 1.0),
         ];
         
     let uv_mappings = [

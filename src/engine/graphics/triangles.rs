@@ -10,13 +10,13 @@ pub enum FrontFace {
 }
 
 
-pub fn is_inside_triangle(vertices_2d: &[Vec2; 3], point: &Vec2, front_face: FrontFace) -> bool {
+pub fn is_inside_triangle(vertices_2d: [Vec2; 3], point: Vec2, front_face: FrontFace, is_y_inverted: bool) -> bool {
 
-    fn create_vector(vertex_start: &Vec2, vertex_end: &Vec2) -> Vec2 {
+    fn create_vector(vertex_start: Vec2, vertex_end: Vec2) -> Vec2 {
         vertex_end.clone().sub(vertex_start.clone())
     }
 
-    fn get_angle(vec: &Vec2) -> f32 {
+    fn get_angle(vec: Vec2) -> f32 {
         
         let radius = (vec.x.powf(2.0) + vec.y.powf(2.0)).sqrt();
         let mut angle;
@@ -37,17 +37,21 @@ pub fn is_inside_triangle(vertices_2d: &[Vec2; 3], point: &Vec2, front_face: Fro
         angle
     }
 
-  
+
     for index in 0..vertices_2d.len() {
 
-        let vector_side = create_vector(&vertices_2d[index], 
-            if index + 1 < 3 { &vertices_2d[index + 1] } else { &vertices_2d[0] });
+        let mut vector_side = create_vector(vertices_2d[index], 
+            if index + 1 < 3 { vertices_2d[index + 1] } else { vertices_2d[0] });
 
-        let vector_point = create_vector(&vertices_2d[index], &point);
+        let mut vector_point = create_vector(vertices_2d[index], point);
 
+        if is_y_inverted == true {
+            vector_side.y *= -1.0;
+            vector_point.y *= -1.0;
+        }
             
-        let angle_side = get_angle(&vector_side);
-        let angle_point = get_angle(&vector_point);
+        let angle_side = get_angle(vector_side);
+        let angle_point = get_angle(vector_point);
 
         let mut angle_dif = angle_point - angle_side;
         if angle_dif < 0.0 { angle_dif += PI * 2.0; }
@@ -66,7 +70,7 @@ pub fn is_inside_triangle(vertices_2d: &[Vec2; 3], point: &Vec2, front_face: Fro
 }
 
 
-pub fn clip_triangle(vertices_2d: &[Vec2; 3], buffer_size: Vec2) -> ((usize, usize), (usize, usize)) {
+pub fn clip_triangle(vertices_2d: [Vec2; 3], buffer_size: Vec2) -> ((usize, usize), (usize, usize)) {
 
     let mut min = vertices_2d[0].clone();
     let mut max = vertices_2d[0].clone();
@@ -84,7 +88,7 @@ pub fn clip_triangle(vertices_2d: &[Vec2; 3], buffer_size: Vec2) -> ((usize, usi
 }
 
 
-pub fn calc_barycentric(vertices: &[Vec2; 3], point: &Vec2) -> [f32; 3] {
+pub fn calc_barycentric(vertices: [Vec2; 3], point: Vec2) -> [f32; 3] {
 
     let w_div: f32 = (vertices[1].y - vertices[2].y) * (vertices[0].x - vertices[2].x) + (vertices[2].x - vertices[1].x) * (vertices[0].y - vertices[2].y);
 
@@ -96,7 +100,7 @@ pub fn calc_barycentric(vertices: &[Vec2; 3], point: &Vec2) -> [f32; 3] {
 }
 
 
-pub fn mul_barycentric<V: Mul<f32, Output = V> + AddAssign + Clone + Default>(weights: &[f32; 3], vecs: [V; 3]) -> V {
+pub fn mul_barycentric<V: Mul<f32, Output = V> + AddAssign + Clone + Default>(weights: [f32; 3], vecs: [V; 3]) -> V {
 
     let mut new_vector = V::default();
 

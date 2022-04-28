@@ -1,13 +1,13 @@
 use std::{f32::consts::PI};
 
-use glam::{Vec2, Mat4};
+use glam::{Mat4};
 
 use super::{Object, Transform, ComponentVec};
 
 
 pub struct Camera {
-    transform: Transform,
-    components: ComponentVec,
+    pub transform: Transform,
+    pub components: ComponentVec,
 
     near: f32,
     far: f32,
@@ -32,7 +32,7 @@ impl Camera {
         self.near
     }
 
-    
+
     pub fn get_view_matrix(&self) -> Mat4 {
         self.transform.matrix
     }

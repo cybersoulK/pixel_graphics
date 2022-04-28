@@ -2,7 +2,8 @@ use std::{any::Any, f32::consts::PI};
 
 use winit::dpi::PhysicalSize;
 
-use super::{Component, ComponentPipe, Transform};
+use pixel_graphics::{Component, ComponentPipe, Transform};
+
 
 const LIMIT_Y_DEGREES: f32 = 150.0 / 2.0 / 180.0 * PI;
 const SENSITIVITY: f32 = 0.001;
@@ -81,4 +82,9 @@ impl Component for CameraMovement {
     fn as_any(&mut self) -> &mut dyn Any {
         self
     }
+}
+
+
+pub fn build () -> CameraMovement {
+    CameraMovement::new()
 }

@@ -1,12 +1,13 @@
 use std::any::Any;
 
-use super::{Component, ComponentPipe, Transform};
+use pixel_graphics::{Component, ComponentPipe, Transform};
 
-pub struct TestComponent {
+
+pub struct CustomComponent {
 
 }
 
-impl Component for TestComponent {
+impl Component for CustomComponent {
 
     fn update(&mut self, transform: &mut Transform, params: &ComponentPipe) {
 
@@ -19,4 +20,9 @@ impl Component for TestComponent {
     fn as_any(&mut self) -> &mut dyn Any {
         self
     }
+}
+
+
+pub fn build () -> CustomComponent {
+    CustomComponent {}
 }

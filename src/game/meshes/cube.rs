@@ -2,19 +2,19 @@ use std::rc::Rc;
 
 use glam::{Vec3, Vec2};
 
-use super::Mesh;
+use pixel_graphics::Mesh;
 
 
-pub fn get_cube() -> Rc<Mesh> {
+pub fn build() -> Rc<Mesh> {
 
     let vertices = [
             Vec3::new(-1.0,-1.0,-1.0), //0
             Vec3::new(1.0,-1.0,-1.0), //1  
-            Vec3::new(-1.0,1.0,-1.0), //2 
-            Vec3::new(1.0,1.0,-1.0), //3
+            Vec3::new(-1.0,-1.0,1.0), //2 
+            Vec3::new(1.0,-1.0,1.0), //3
 
-            Vec3::new(-1.0,-1.0,1.0), //4
-            Vec3::new(1.0,-1.0,1.0), //5
+            Vec3::new(-1.0,1.0,-1.0), //4
+            Vec3::new(1.0,1.0,-1.0), //5
             Vec3::new(-1.0,1.0,1.0), //6
             Vec3::new(1.0,1.0,1.0), //7
         ];
