@@ -1,4 +1,4 @@
-use std::{rc::Rc, f32::consts::PI};
+use std::{rc::Rc, f32::consts::{PI, E}};
 
 use glam::{Vec3, Vec4};
 
@@ -31,28 +31,46 @@ impl Shader for CustomShader {
             _ => Vec4::new(0.71, 0.71, 0.0, 1.0),
         };*/
 
-        //core.color = Vec4::new(0.5294, 0.807843, 0.9216, 1.0);
+        //core.color = Vec4::new(0.5294, 0.807843, 0.9216, 1.0);]
 
-
-        let freq = PI * 2.0 / 3.0 * 0.0;
-        core.color.x = (((core.vertex.x - 0.5).powf(2.0) + (core.vertex.z - 0.5).powf(2.0)).sqrt()
-        * params.elapsed_time.as_secs_f32() * FREQUENCY + freq).sin() * 0.4;
-
-        let freq = PI * 2.0 / 3.0 * 1.0;
-        core.color.y = (((core.vertex.x - 0.5).powf(2.0) + (core.vertex.z - 0.5).powf(2.0)).sqrt()
-        * params.elapsed_time.as_secs_f32() * FREQUENCY + freq).sin() * 0.8;
-
-        let freq = PI * 2.0 / 3.0 * 2.0;
-        core.color.z = (((core.vertex.x - 0.5).powf(2.0) + (core.vertex.z - 0.5).powf(2.0)).sqrt()
-                        * params.elapsed_time.as_secs_f32() * FREQUENCY + freq).sin() * 0.8;
-
+        fn get_angle(vec: glam::Vec2) -> f32 {
+        
+            let radius = (vec.x.powf(2.0) + vec.y.powf(2.0)).sqrt();
+            let mut angle;
+    
+            if vec.x > 0.0 && vec.y > 0.0 {
+    
+                let sin = vec.y / radius;
+                angle = sin.asin();
+            }
+            else {
+                
+                let cos = vec.x / radius;
+                angle = cos.acos();
+    
+                if vec.y < 0.0 { angle = PI * 2.0 - angle}
+            }
+    
+            angle
+        }
                         
-        const FREQUENCY: f32 = 0.2;
-        const HEIGHT: f32 = 0.2;
+        const FREQUENCY: f32 = 0.5;
+        const HEIGHT: f32 = 1.0;
 
-        let freq = PI * 2.0 / 3.0 * 0.0;
-        core.vertex.y = std::f32::consts::E.powf((((core.vertex.x - 0.5).powf(2.0) + (core.vertex.z - 0.5).powf(2.0)).sqrt()
-                        * params.elapsed_time.as_secs_f32() * FREQUENCY + freq)).sin() * HEIGHT;
+        let x = core.vertex.x - 0.5;
+        let z = core.vertex.z - 0.5;
+
+        let a = 1.0;
+        let b = 1.0;
+
+        //
+        let spiral = (get_angle(glam::vec2(x, z)) + (PI * 2.0) * (x.powf(2.0) + z.powf(2.0)).sqrt() * params.elapsed_time.as_secs_f32() * FREQUENCY ).sin();
+        core.vertex.y = spiral * HEIGHT + (1.0 / ((x.powf(2.0) + z.powf(2.0)).powf(0.8) + 0.001)) * 0.2;
+
+        core.color.x = 0.3;
+        core.color.z = 0.5;
+
+        core.color.y = spiral * 0.8;
 
         core.color *= (0.2 * core.vertex.y / HEIGHT) + 0.8;
         
