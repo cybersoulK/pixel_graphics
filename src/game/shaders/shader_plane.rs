@@ -35,16 +35,16 @@ impl Shader for CustomShader {
 
 
         core.color.x = (((core.vertex.x - 0.5).powf(2.0) + (core.vertex.z - 0.5).powf(2.0)).sqrt()
-                        * params.elapsed_time.as_secs_f32() * FREQUENCY).sin() * 0.6;
+                        * params.elapsed_time.as_secs_f32() * FREQUENCY).sin() * 0.4;
 
         core.color.y = (((core.vertex.x - 0.5).powf(2.0) + (core.vertex.z - 0.5).powf(2.0)).sqrt()
-                        * params.elapsed_time.as_secs_f32() * FREQUENCY + PI * 2.0 / 3.0 * 1.0).sin() * 0.6;
+                        * params.elapsed_time.as_secs_f32() * FREQUENCY + PI * 2.0 / 3.0 * 1.0).sin() * 0.8;
 
         core.color.z = (((core.vertex.x - 0.5).powf(2.0) + (core.vertex.z - 0.5).powf(2.0)).sqrt()
-                        * params.elapsed_time.as_secs_f32() * FREQUENCY + PI * 2.0 / 3.0 * 2.0).sin() * 0.6;
+                        * params.elapsed_time.as_secs_f32() * FREQUENCY + PI * 2.0 / 3.0 * 2.0).sin() * 0.8;
 
 
-        const FREQUENCY: f32 = 4.0;
+        const FREQUENCY: f32 = 40.0;
         const HEIGHT: f32 = 0.2;
         
         core.vertex.y = (((core.vertex.x - 0.5).powf(2.0) + (core.vertex.z - 0.5).powf(2.0)).sqrt()
