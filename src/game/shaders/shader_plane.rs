@@ -54,25 +54,26 @@ impl Shader for CustomShader {
             angle
         }
                         
-        const FREQUENCY: f32 = 0.5;
+        const FREQUENCY: f32 = 10.0;
         const HEIGHT: f32 = 1.0;
 
         let x = core.vertex.x - 0.5;
         let z = core.vertex.z - 0.5;
 
-        let a = 1.0;
-        let b = 1.0;
+        let a = 3.0 + params.elapsed_time.as_secs_f32() * FREQUENCY;
+        let b = 2.0 + params.elapsed_time.as_secs_f32() * FREQUENCY;
 
         //
-        let spiral = (get_angle(glam::vec2(x, z)) + (PI * 2.0) * (x.powf(2.0) + z.powf(2.0)).sqrt() * params.elapsed_time.as_secs_f32() * FREQUENCY ).sin();
-        core.vertex.y = spiral * HEIGHT + (1.0 / ((x.powf(2.0) + z.powf(2.0)).powf(0.8) + 0.001)) * 0.2;
+        let spiral = ((x.powf(2.0) + z.powf(2.0) * a).sqrt().tan() * x * b - z);
+        let spiral_norm = -spiral.powf(2.0) + 1.0;
+        core.vertex.y = spiral_norm * HEIGHT;
 
         core.color.x = 0.3;
         core.color.z = 0.5;
 
-        core.color.y = spiral * 0.8;
+        core.color.y = spiral * 0.8 + 0.2;
 
-        core.color *= (0.2 * core.vertex.y / HEIGHT) + 0.8;
+        core.color *= (0.5 * core.vertex.y / HEIGHT) + 0.5;
         
         core
     }
