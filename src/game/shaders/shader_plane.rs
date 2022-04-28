@@ -34,21 +34,25 @@ impl Shader for CustomShader {
         //core.color = Vec4::new(0.5294, 0.807843, 0.9216, 1.0);
 
 
+        let freq = PI * 2.0 / 3.0 * 0.0;
         core.color.x = (((core.vertex.x - 0.5).powf(2.0) + (core.vertex.z - 0.5).powf(2.0)).sqrt()
-                        * params.elapsed_time.as_secs_f32() * FREQUENCY).sin() * 0.4;
+        * params.elapsed_time.as_secs_f32() * FREQUENCY + freq).sin() * 0.4;
 
+        let freq = PI * 2.0 / 3.0 * 1.0;
         core.color.y = (((core.vertex.x - 0.5).powf(2.0) + (core.vertex.z - 0.5).powf(2.0)).sqrt()
-                        * params.elapsed_time.as_secs_f32() * FREQUENCY + PI * 2.0 / 3.0 * 1.0).sin() * 0.8;
+        * params.elapsed_time.as_secs_f32() * FREQUENCY + freq).sin() * 0.8;
 
+        let freq = PI * 2.0 / 3.0 * 2.0;
         core.color.z = (((core.vertex.x - 0.5).powf(2.0) + (core.vertex.z - 0.5).powf(2.0)).sqrt()
-                        * params.elapsed_time.as_secs_f32() * FREQUENCY + PI * 2.0 / 3.0 * 2.0).sin() * 0.8;
+                        * params.elapsed_time.as_secs_f32() * FREQUENCY + freq).sin() * 0.8;
 
-
-        const FREQUENCY: f32 = 40.0;
+                        
+        const FREQUENCY: f32 = 0.2;
         const HEIGHT: f32 = 0.2;
-        
-        core.vertex.y = (((core.vertex.x - 0.5).powf(2.0) + (core.vertex.z - 0.5).powf(2.0)).sqrt()
-                        * params.elapsed_time.as_secs_f32() * FREQUENCY).sin() * HEIGHT;
+
+        let freq = PI * 2.0 / 3.0 * 0.0;
+        core.vertex.y = std::f32::consts::E.powf((((core.vertex.x - 0.5).powf(2.0) + (core.vertex.z - 0.5).powf(2.0)).sqrt()
+                        * params.elapsed_time.as_secs_f32() * FREQUENCY + freq)).sin() * HEIGHT;
 
         core.color *= (0.2 * core.vertex.y / HEIGHT) + 0.8;
         
