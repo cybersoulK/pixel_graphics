@@ -76,8 +76,8 @@ impl GameLoop for Game {
 
 
         //---------
-        /*let triangle = objects::triangle::build(engine);
-        engine.add_drawable(triangle);*/
+        //let triangle = objects::triangle::build(engine);
+        //engine.add_drawable(triangle);
         
         //--------
         /*let mut cube = objects::cube::build(engine);

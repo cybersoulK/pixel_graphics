@@ -9,7 +9,7 @@ pub fn build(engine: &mut Engine) -> DrawableObject {
 
     let plane_transform = Transform { 
         translation: glam::vec3(-0.5, -1.0, 0.5), 
-        scale: glam::vec3(5.0, 0.0, 5.0), 
+        scale: glam::vec3(20.0, 0.0, 20.0), 
         ..Default::default() 
     };
 

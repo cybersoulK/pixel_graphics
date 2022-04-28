@@ -4,10 +4,10 @@ use crate::game::{shaders, meshes, components};
 
 
 pub fn build(engine: &mut Engine) -> DrawableObject {
-    
+
     let trig_mesh = meshes::triangle::build();
     let trig_transform = Transform { 
-        translation: glam::vec3(100.0, 100.0, 100.0), 
+        translation: glam::vec3(0.0, 0.0, 0.0), 
         scale: glam::vec3(3.0, 2.0, 1.0), 
         ..Default::default() 
     };
