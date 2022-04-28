@@ -1,9 +1,9 @@
-use pixel_graphics::{Engine, Transform, DrawableObject, Material, Model};
+use pixel_graphics::{Transform, DrawableObject, Material, Model, Assets};
 
 use crate::game::{shaders, meshes, components};
 
 
-pub fn build(engine: &mut Engine) -> DrawableObject {
+pub fn build(assets: &mut Assets) -> DrawableObject {
 
     let cube_mesh = meshes::cube::build();
     let cube_transform = Transform { 
@@ -12,9 +12,9 @@ pub fn build(engine: &mut Engine) -> DrawableObject {
     };
 
     let shader2 = shaders::shader2::build();
-    engine.assets.create_shader("#shader2", shader2);
+    assets.create_shader("#shader2", shader2);
 
-    let cube_shader = engine.assets.load_shader("#shader2");
+    let cube_shader = assets.load_shader("#shader2");
     /*let cube_texture = engine.assets.load_texture("...");*/  let cube_texture = Default::default();
     let cube_material = Material::new([cube_texture].to_vec(), cube_shader);
 

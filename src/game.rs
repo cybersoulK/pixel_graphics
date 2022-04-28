@@ -71,16 +71,16 @@ impl GameLoop for Game {
         engine.add_light(light);
 
         //---------
-        let plane = objects::plane::build(engine);
+        let plane = objects::plane::build(&mut engine.assets);
         engine.add_drawable(plane);
 
 
         //---------
-        //let triangle = objects::triangle::build(engine);
+        //let triangle = objects::triangle::build(&mut engine.assets);
         //engine.add_drawable(triangle);
         
         //--------
-        /*let mut cube = objects::cube::build(engine);
+        /*let mut cube = objects::cube::build(&mut engine.assets);
 
         cube.transform.translation = glam::vec3(0.0, 0.0, 2.0);
         engine.add_drawable(cube.clone());

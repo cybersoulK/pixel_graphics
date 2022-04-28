@@ -58,10 +58,10 @@ fn execute_vertex_shader(shader: &Rc<dyn Shader>, core_pipe: [CorePipe; 3], vert
 
     [0, 1, 2].map(|vertex_id| {
         let mut core_pipe = shader.vertex_shader(core_pipe[vertex_id], &vertex_pipe, face_id, vertex_id);
-
+        
         core_pipe.vertex = model_matrix.transform_point3(core_pipe.vertex);
         core_pipe.norm = model_matrix.transform_vector3(core_pipe.norm);
-
+        
         core_pipe
     })
 }
@@ -113,7 +113,9 @@ fn execute_fragment_shader(shader: &Rc<dyn Shader>, core_pipe: [CorePipe; 3], fr
                 
                 if vertex_2d.z >= camera.get_near() && vertex_2d.z < z_buffer[depth_index] {
            
-                    let output = shader.fragment_shader(core_pipe, &fragment_pipe, vertex_2d);
+                    let mut output = shader.fragment_shader(core_pipe, &fragment_pipe, vertex_2d);
+
+                    output *= 255.0;
 
                     buffer[pixel_index + 0] = output.x as u8;
                     buffer[pixel_index + 1] = output.y as u8;

@@ -21,9 +21,9 @@ impl Shader for CustomShader {
     fn vertex_shader(&self, mut core: CorePipe, params: &VertexPipe, _face_id: usize, vertex_id: usize) -> CorePipe {
         
         core.color = match vertex_id {
-            0 => Vec4::new(255.0, 0.0, 0.0, 255.0),
-            1 => Vec4::new(0.0, 0.0, 255.0, 255.0),
-            _ => Vec4::new(0.0, 255.0, 0.0, 255.0),
+            0 => Vec4::new(1.0, 0.0, 0.0, 1.0),
+            1 => Vec4::new(0.0, 0.0, 1.0, 1.0),
+            _ => Vec4::new(0.0, 1.0, 0.0, 1.0),
         };
 
         const X_MOVING_SPEED: f32 = (3.14 * 2.0) * 0.15;

@@ -1,9 +1,9 @@
-use pixel_graphics::{Engine, Transform, DrawableObject, Material, Model};
+use pixel_graphics::{Transform, DrawableObject, Material, Model, Assets};
 
 use crate::game::{shaders, meshes, components};
 
 
-pub fn build(engine: &mut Engine) -> DrawableObject {
+pub fn build(assets: &mut Assets) -> DrawableObject {
 
     let trig_mesh = meshes::triangle::build();
     let trig_transform = Transform { 
@@ -13,9 +13,9 @@ pub fn build(engine: &mut Engine) -> DrawableObject {
     };
     
     let shader1 = shaders::shader1::build();
-    engine.assets.create_shader("#shader1", shader1);
+    assets.create_shader("#shader1", shader1);
 
-    let trig_shader = engine.assets.load_shader("#shader1");
+    let trig_shader = assets.load_shader("#shader1");
     /*let trig_texture = engine.assets.load_texture("...");*/  let trig_texture = Default::default();
     let trig_material = Material::new([trig_texture].to_vec(), trig_shader);
 
