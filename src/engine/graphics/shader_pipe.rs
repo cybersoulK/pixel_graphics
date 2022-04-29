@@ -108,14 +108,14 @@ impl DynamicPipe {
 
         let mut intersected_dynamic_pipe = DynamicPipe::new();
 
-        for i in 0..dynamic_pipe[0].len() {
+        for key in 0..dynamic_pipe[0].len() {
 
             let values = [0, 1, 2].map(|i| {
-                dynamic_pipe[i].get(i)
+                dynamic_pipe[i].get(key)
             });
 
             let intersected = mul_barycentric(weights, values);
-            intersected_dynamic_pipe.push(i, intersected);
+            intersected_dynamic_pipe.push(key, intersected);
         }
         
         intersected_dynamic_pipe

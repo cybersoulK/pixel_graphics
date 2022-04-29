@@ -55,19 +55,26 @@ pub fn render_update(buffer: &mut [u8], z_buffer: &mut [f32], buffer_size: Vec2,
 
 fn execute_vertex_shader(shader: &Rc<dyn Shader>, core_pipe: [CorePipe; 3], params_pipe: &ParamsPipe, dynamic_pipe: &mut[&mut DynamicPipe; 3], model_matrix: Mat4, face_id: usize) -> [CorePipe; 3] {
 
-    [0, 1, 2].map(|vertex_id| {
+    let core_pipe = [0, 1, 2].map(|vertex_id| {
 
-        let mut core_pipe = core_pipe[vertex_id];
-
-        core_pipe = shader.vertex_shader(core_pipe, &params_pipe, dynamic_pipe[vertex_id], face_id, vertex_id);
+        let mut core_pipe = shader.vertex_shader(core_pipe[vertex_id], &params_pipe, dynamic_pipe[vertex_id], face_id, vertex_id);
         
         core_pipe.vertex = model_matrix.transform_point3(core_pipe.vertex);
-        core_pipe.norm = model_matrix.transform_vector3(core_pipe.norm);
-
-        core_pipe = shader.model_shader(core_pipe, &params_pipe, dynamic_pipe[vertex_id]);
+        core_pipe.norm = model_matrix.transform_vector3(core_pipe.norm).normalize();   
         
         core_pipe
-    })
+    });
+
+    
+    let core_pipe = shader.geometry_shader(core_pipe, &params_pipe, dynamic_pipe);
+
+    let core_pipe = [0, 1, 2].map(|vertex_id| {
+
+        let core_pipe = shader.vertex_world_shader(core_pipe[vertex_id], &params_pipe, dynamic_pipe[vertex_id]);
+        core_pipe
+    });
+
+    core_pipe
 }
 
 fn execute_fragment_shader(shader: &Rc<dyn Shader>, core_pipe: [CorePipe; 3], params_pipe: &ParamsPipe, dynamic_pipe: &mut[&mut DynamicPipe; 3], camera: &Camera, buffer: &mut [u8], z_buffer: &mut [f32], buffer_size: Vec2) {

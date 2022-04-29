@@ -75,35 +75,21 @@ impl GameLoop for Game {
         engine.add_light(light.clone());
 
         //---------
-        let plane = objects::plane::build(&mut engine.assets);
-        engine.add_drawable(plane);
+      
 
 
         let mut cube = objects::cube::build(&mut engine.assets);
 
-        cube.transform.translation = light.transform.translation;
-        engine.add_drawable(cube.clone());
-
+        for z in 0..10 {
+            for x in 0..10 {
+                cube.transform.translation = glam::vec3(x as f32, 0.0, z as f32);
+                engine.add_drawable(cube.clone());
+            }
+        }
 
         //---------
         //let triangle = objects::triangle::build(&mut engine.assets);
         //engine.add_drawable(triangle);
-        
-        //--------
-        /*let mut cube = objects::cube::build(&mut engine.assets);
-
-        cube.transform.translation = glam::vec3(0.0, 0.0, 2.0);
-        engine.add_drawable(cube.clone());
-
-        cube.transform.translation = glam::vec3(0.0, 0.0, -2.0);
-        engine.add_drawable(cube.clone());
-
-        cube.transform.translation = glam::vec3(2.0, 0.0, 0.0);
-        engine.add_drawable(cube.clone());
-
-        cube.transform.translation = glam::vec3(-2.0, 0.0, 0.0);
-        engine.add_drawable(cube.clone());*/
-        
     }
 
     fn update_end(&mut self, _engine: &mut Engine, window: &mut Window, inputs: &mut InputsManager){

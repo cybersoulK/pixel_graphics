@@ -17,8 +17,8 @@ impl CustomShader {
     }
 }
 
-const DIRECTIONAL_LIGHT: usize = 1;
-const SPOT_LIGHT: usize = 2;
+const DIRECTIONAL_LIGHT: usize = 0;
+const SPOT_LIGHT: usize = 1;
 
 impl Shader for CustomShader {
 
@@ -58,7 +58,7 @@ impl Shader for CustomShader {
             angle
         }
                         
-        const FREQUENCY: f32 = 0.5;
+        const FREQUENCY: f32 = 0.2;
         const HEIGHT: f32 = 1.0;
 
         let x = core.vertex.x - 0.5;
@@ -74,9 +74,23 @@ impl Shader for CustomShader {
         core
     }
 
-    fn model_shader(&self, mut core: CorePipe, params: &ParamsPipe, dynamic: &mut DynamicPipe) -> CorePipe {
+    fn geometry_shader(&self, mut core: [CorePipe; 3], params: &ParamsPipe, dynamic: &[&mut DynamicPipe; 3]) -> [CorePipe; 3] {
         
+        let vec1 = core[0].vertex - core[1].vertex;
+        let vec2 = core[2].vertex - core[1].vertex;
 
+        let cross = vec1.cross(vec2).normalize();
+
+
+        core[0].norm = cross;
+        core[1].norm = cross;
+        core[2].norm = cross;
+
+        core
+    }
+
+    fn vertex_world_shader(&self, mut core: CorePipe, params: &ParamsPipe, dynamic: &mut DynamicPipe) -> CorePipe {
+        
         let mut spot_light = 0.0;
 
         for light in params.lights {
@@ -92,12 +106,13 @@ impl Shader for CustomShader {
         core
     }
 
+
     fn fragment_shader(&self, mut core: CorePipe, params: &ParamsPipe, dynamic: DynamicPipe, texture_color: glam::Vec4) -> glam::Vec4 {
         
         let directional_light = dynamic.get(DIRECTIONAL_LIGHT);
         let spot_light = dynamic.get(SPOT_LIGHT);
 
-        let mut color = core.color * (spot_light + directional_light * 0.0);
+        let mut color = core.color * (directional_light);
         color.w = 1.0;
         
         color
