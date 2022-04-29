@@ -1,5 +1,5 @@
 pub use window::WindowPixel;
-pub use shader_pipe::{CorePipe, VertexPipe, FragmentPipe};
+pub use shader_pipe::{CorePipe, ParamsPipe, DynamicPipe};
 pub use render::render_update;
 
 mod settings;

@@ -14,6 +14,7 @@ mod components {
     pub mod simple_movement;
     pub mod trig_component;
     pub mod plane_component;
+    pub mod light_movement;
 }
 mod meshes {
     pub mod triangle;
@@ -27,8 +28,10 @@ mod objects {
     pub mod plane;
 }
 mod shaders {
+    pub mod common_fn;
     pub mod shader1;
     pub mod shader2;
+    pub mod shader_spiral;
     pub mod shader_plane;
 }
 
@@ -64,15 +67,22 @@ impl GameLoop for Game {
 
         //---------
         let light_transform = Transform {
-            translation: glam::vec3(0.0, 0.0, 0.0),
+            translation: glam::vec3(0.0, 2.0, 0.0),
             ..Default::default()
         };
-        let light = Light::new(light_transform);
-        engine.add_light(light);
+        let mut light = Light::new(light_transform);
+        light.components.add(components::light_movement::build());
+        engine.add_light(light.clone());
 
         //---------
         let plane = objects::plane::build(&mut engine.assets);
         engine.add_drawable(plane);
+
+
+        let mut cube = objects::cube::build(&mut engine.assets);
+
+        cube.transform.translation = light.transform.translation;
+        engine.add_drawable(cube.clone());
 
 
         //---------

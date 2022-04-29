@@ -1,9 +1,12 @@
 use super::{Object, Transform, ComponentVec};
 
 
+#[derive(Clone)]
 pub struct Light {
     pub transform: Transform,
     pub components: ComponentVec,
+
+    //TODO pub intensity; 
 }
 
 impl Light {

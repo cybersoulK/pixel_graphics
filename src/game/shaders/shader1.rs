@@ -1,8 +1,8 @@
 use std::rc::Rc;
 
-use glam::{Vec3, Vec4};
+use glam::{Vec4};
 
-use pixel_graphics::{Shader, CorePipe, VertexPipe, FragmentPipe};
+use pixel_graphics::{Shader, CorePipe, ParamsPipe, DynamicPipe};
 
 
 pub struct CustomShader {}
@@ -18,7 +18,7 @@ impl CustomShader {
 
 impl Shader for CustomShader {
 
-    fn vertex_shader(&self, mut core: CorePipe, params: &VertexPipe, _face_id: usize, vertex_id: usize) -> CorePipe {
+    fn vertex_shader(&self, mut core: CorePipe, params: &ParamsPipe, dynamic: &mut DynamicPipe, _face_id: usize, vertex_id: usize) -> CorePipe {
         
         core.color = match vertex_id {
             0 => Vec4::new(1.0, 0.0, 0.0, 1.0),
@@ -35,11 +35,6 @@ impl Shader for CustomShader {
         };
 
         core
-    }
-
-    fn fragment_shader(&self, core: CorePipe, _params: &FragmentPipe, _vertex_2d: Vec3) -> Vec4 {
-    
-        core.color
     }
 }
 

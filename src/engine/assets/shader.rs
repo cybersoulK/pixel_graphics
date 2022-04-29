@@ -1,8 +1,17 @@
-use glam::{Vec3, Vec4};
+use glam::{Vec4};
 
-use super::super::{CorePipe, VertexPipe, FragmentPipe};
+use super::super::{CorePipe, ParamsPipe, DynamicPipe};
 
+
+#[allow(unused_variables)]
+#[allow(unused_mut)]
 pub trait Shader {
-    fn vertex_shader(&self, core: CorePipe, params: &VertexPipe, vertex_id: usize, face_id: usize) -> CorePipe;
-    fn fragment_shader(&self, core: CorePipe, params: &FragmentPipe, vertex_2d: Vec3) -> Vec4;
+    fn vertex_shader(&self, mut core: CorePipe, params: &ParamsPipe, dynamic: &mut DynamicPipe, vertex_id: usize, face_id: usize) -> CorePipe
+    { core }
+    
+    fn model_shader(&self, mut core: CorePipe, params: &ParamsPipe, dynamic: &mut DynamicPipe) -> CorePipe
+    { core }
+
+    fn fragment_shader(&self, mut core: CorePipe, params: &ParamsPipe, dynamic: DynamicPipe, texture_color: Vec4 ) -> Vec4
+    { core.color }
 }

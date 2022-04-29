@@ -7,9 +7,10 @@ use super::super::{
 };
 
 
+#[allow(unused_variables)]
 pub trait Component {
-    fn init(&mut self, _transform: &mut Transform) {}
-    fn update(&mut self, _transform: &mut Transform, _params: &ComponentPipe) {}
+    fn init(&mut self, transform: &mut Transform) {}
+    fn update(&mut self, transform: &mut Transform, params: &ComponentPipe) {}
 
     fn as_any(&mut self) -> &mut dyn Any;
 }

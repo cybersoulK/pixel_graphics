@@ -1,10 +1,6 @@
 use std::{rc::Rc, f32::consts::{PI}};
 
-use glam::{Vec3};
-
 use pixel_graphics::{Shader, CorePipe, ParamsPipe, DynamicPipe};
-
-use super::common_fn::{directional_light, spot_lighting};
 
 
 pub struct CustomShader {}
@@ -17,14 +13,12 @@ impl CustomShader {
     }
 }
 
-const DIRECTIONAL_LIGHT: usize = 1;
-const SPOT_LIGHT: usize = 2;
 
 impl Shader for CustomShader {
 
     fn vertex_shader(&self, mut core: CorePipe, params: &ParamsPipe, dynamic: &mut DynamicPipe, mut face_id: usize, vertex_id: usize) -> CorePipe {
         
-        face_id %= 12;
+        //face_id %= 12;
 
         /*core.color = match face_id {
             0 | 1 => Vec4::new(0.71, 0.0, 0.0, 1.0),
@@ -58,7 +52,7 @@ impl Shader for CustomShader {
             angle
         }
                         
-        const FREQUENCY: f32 = 0.5;
+        const FREQUENCY: f32 = 2.0;
         const HEIGHT: f32 = 1.0;
 
         let x = core.vertex.x - 0.5;
@@ -68,41 +62,16 @@ impl Shader for CustomShader {
         core.vertex.y = spiral * HEIGHT + (1.0 / ((x.powf(2.0) + z.powf(2.0)).sqrt() + 0.001)) * 0.2;
 
         core.color.x = 0.3;
-        core.color.y = 0.5;
-        core.color.z = 0.8;
+        core.color.z = 0.5;
 
+        core.color.y = spiral * 0.8;
+
+        core.color *= (0.2 * core.vertex.y / HEIGHT) + 0.8;
+        
         core
-    }
-
-    fn model_shader(&self, mut core: CorePipe, params: &ParamsPipe, dynamic: &mut DynamicPipe) -> CorePipe {
-        
-
-        let mut spot_light = 0.0;
-
-        for light in params.lights {
-            spot_light += spot_lighting(core.vertex, core.norm, light);
-        }
-
-        let directional_light = directional_light(core.norm, Vec3::new(1.0, -1.0, 1.0));
-        
-
-        dynamic.push(DIRECTIONAL_LIGHT, directional_light); 
-        dynamic.push(SPOT_LIGHT, spot_light); 
-
-        core
-    }
-
-    fn fragment_shader(&self, mut core: CorePipe, params: &ParamsPipe, dynamic: DynamicPipe, texture_color: glam::Vec4) -> glam::Vec4 {
-        
-        let directional_light = dynamic.get(DIRECTIONAL_LIGHT);
-        let spot_light = dynamic.get(SPOT_LIGHT);
-
-        let mut color = core.color * (spot_light + directional_light * 0.0);
-        color.w = 1.0;
-        
-        color
     }
 }
+
 
 pub fn build() -> Rc<CustomShader> {
     CustomShader::new()
